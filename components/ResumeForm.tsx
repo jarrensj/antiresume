@@ -126,7 +126,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
   const validateTweets = () => {
     const validTweets = tweets.filter(tweet => tweet.tweet_link.trim() !== '')
     if (validTweets.length === 0) {
-      setError('At least one tweet link is required')
+      setError('At least one post link is required')
       return false
     }
 
@@ -135,7 +135,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
       try {
         new URL(tweet.tweet_link)
       } catch {
-        setError('Please enter valid URLs for tweet links')
+        setError('Please enter valid URLs for post links')
         return false
       }
     }
@@ -243,7 +243,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
             {resume ? 'Edit Resume' : 'Create Resume'}
           </h2>
           <p style={{ color: 'var(--foreground-secondary)' }}>
-            Add tweet links to showcase your thoughts and insights
+            Add Twitter/X or Instagram posts to showcase your thoughts and insights
           </p>
         </div>
         {resume && (
@@ -312,7 +312,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                   className="text-xl font-medium"
                   style={{ fontFamily: 'var(--font-handwritten)', color: 'var(--foreground)' }}
                 >
-                  Tweet #{index + 1}
+                  Post #{index + 1}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -402,13 +402,13 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                   className="block text-sm font-medium mb-2"
                   style={{ color: 'var(--foreground)' }}
                 >
-                  Tweet Link *
+                  Post Link (Twitter/X or Instagram) *
                 </label>
                 <input
                   type="url"
                   value={tweet.tweet_link}
                   onChange={(e) => updateTweet(index, 'tweet_link', e.target.value)}
-                  placeholder="https://twitter.com/username/status/..."
+                  placeholder="https://twitter.com/... or https://instagram.com/p/..."
                   className="w-full px-4 py-3 rounded-xl transition-all duration-200"
                   style={{
                     border: '1.5px solid var(--border-gentle)',
@@ -438,7 +438,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                 <textarea
                   value={tweet.notes || ''}
                   onChange={(e) => updateTweet(index, 'notes', e.target.value)}
-                  placeholder="Add your thoughts about this tweet..."
+                  placeholder="Add your thoughts about this post..."
                   rows={3}
                   className="w-full px-4 py-3 rounded-xl transition-all duration-200 resize-none"
                   style={{
@@ -499,7 +499,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
               }
             }}
           >
-            Add Another Tweet
+            Add Another Post
           </button>
 
           <button

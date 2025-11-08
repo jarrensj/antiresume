@@ -105,7 +105,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <div className="w-24 h-0.5 mx-auto" style={{ background: 'var(--accent-sage)' }}></div>
         </div>
 
-        {/* Tweets Section */}
+        {/* Posts Section */}
         <div className="space-y-6">
           {profile.tweets && profile.tweets.length > 0 ? (
             <>
@@ -129,7 +129,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   className="text-3xl font-semibold mb-3"
                   style={{ fontFamily: 'var(--font-handwritten)', color: 'var(--foreground)' }}
                 >
-                  No tweets yet
+                  No posts yet
                 </h2>
                 <p style={{ color: 'var(--foreground-secondary)', fontSize: '1.1rem' }}>
                   {profile.username} hasn&apos;t shared any thoughts yet.

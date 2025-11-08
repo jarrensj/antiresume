@@ -108,7 +108,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow: var(--shadow-soft);
 }
 
-/* Tweet Card Component */
+/* Tweet Card Component (supports both Twitter and Instagram) */
 .tweet-card {
   display: flex;
   flex-direction: column;
@@ -142,6 +142,23 @@ input:focus, textarea:focus, select:focus {
   transform: scale(0.65);
   transform-origin: center;
   margin: -15px 0 -35px 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Instagram embed specific styling */
+.instagram-embed-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  transform: scale(1);
+  margin: 0;
+}
+
+.instagram-media {
+  min-width: 326px !important;
+  max-width: 540px !important;
 }
 
 .tweet-card .tweet-note {
@@ -158,6 +175,16 @@ input:focus, textarea:focus, select:focus {
   text-align: center;
   line-height: 1.5;
   box-shadow: var(--shadow-gentle);
+}
+
+/* Instagram posts need different spacing for notes */
+.tweet-card.instagram-post .tweet-note {
+  margin-top: 1rem;
+}
+
+.tweet-card.instagram-post .tweet-embed {
+  transform: scale(1);
+  margin: 0;
 }
 
 /* Remove default spacing from react-tweet */

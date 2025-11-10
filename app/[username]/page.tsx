@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { notFound } from 'next/navigation'
 import PublicTweetCard from '@/components/PublicTweetCard'
-import { Linkedin, Twitter, Instagram, Globe, Copy, Check } from 'lucide-react'
+import { Linkedin, Twitter, Instagram, Globe, Mail, Copy, Check } from 'lucide-react'
 
 interface TweetItem {
   tweet_link: string
@@ -20,6 +20,7 @@ interface UserProfile {
   twitter_handle?: string | null
   ig_handle?: string | null
   website?: string | null
+  email?: string | null
   evm_wallet_address?: string | null
   solana_wallet_address?: string | null
 }
@@ -95,6 +96,15 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   const getSocialLinks = () => {
     const links = []
+    
+    if (profile.email) {
+      links.push({
+        href: `mailto:${profile.email}`,
+        icon: Mail,
+        label: 'Email',
+        ariaLabel: 'Send email'
+      })
+    }
     
     if (profile.linkedin) {
       links.push({

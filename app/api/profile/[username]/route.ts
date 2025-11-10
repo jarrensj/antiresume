@@ -16,10 +16,10 @@ export async function GET(
     const supabase = createClerkSupabaseClient()
     
     // Get public profile data by username
-    // We only return public information, not sensitive data like clerk_user_id or email
+    // We only return public information, not sensitive data like clerk_user_id
     const { data: profile, error } = await supabase
       .from('user_profiles')
-      .select('id, username, linkedin, twitter_handle, ig_handle, website, evm_wallet_address, solana_wallet_address, created_at')
+      .select('id, username, linkedin, twitter_handle, ig_handle, website, email, evm_wallet_address, solana_wallet_address, created_at')
       .eq('username', username.trim())
       .single()
 

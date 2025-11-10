@@ -2,6 +2,91 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuth } from "@clerk/nextjs/server"
 import { createClerkSupabaseClient } from "@/app/lib/db"
 
+// Validation helpers
+function validateUrl(url: string): boolean {
+  if (!url.trim()) return true // Empty is valid (optional field)
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function validateLinkedIn(url: string): string | null {
+  if (!url.trim()) return null // Empty is valid
+  if (!validateUrl(url)) {
+    return 'Please enter a valid LinkedIn URL'
+  }
+  try {
+    const urlObj = new URL(url)
+    if (!urlObj.hostname.includes('linkedin.com')) {
+      return 'Please enter a valid LinkedIn URL from linkedin.com'
+    }
+  } catch {
+    return 'Please enter a valid LinkedIn URL'
+  }
+  return null
+}
+
+function validateTwitterHandle(handle: string): string | null {
+  if (!handle.trim()) return null // Empty is valid
+  const cleanHandle = handle.trim().replace(/^@/, '')
+  if (cleanHandle.length < 1 || cleanHandle.length > 15) {
+    return 'Twitter handle must be 1-15 characters'
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(cleanHandle)) {
+    return 'Twitter handle can only contain letters, numbers, and underscores'
+  }
+  return null
+}
+
+function validateInstagramHandle(handle: string): string | null {
+  if (!handle.trim()) return null // Empty is valid
+  const cleanHandle = handle.trim().replace(/^@/, '')
+  if (cleanHandle.length < 1 || cleanHandle.length > 30) {
+    return 'Instagram handle must be 1-30 characters'
+  }
+  if (!/^[a-zA-Z0-9_.]+$/.test(cleanHandle)) {
+    return 'Instagram handle can only contain letters, numbers, underscores, and periods'
+  }
+  return null
+}
+
+function validateWebsite(url: string): string | null {
+  if (!url.trim()) return null // Empty is valid
+  if (!validateUrl(url)) {
+    return 'Please enter a valid website URL (must include http:// or https://)'
+  }
+  return null
+}
+
+function validateSocialMediaFields(linkedin?: string, twitter_handle?: string, ig_handle?: string, website?: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = []
+  
+  if (linkedin) {
+    const error = validateLinkedIn(linkedin)
+    if (error) errors.push(error)
+  }
+  
+  if (twitter_handle) {
+    const error = validateTwitterHandle(twitter_handle)
+    if (error) errors.push(error)
+  }
+  
+  if (ig_handle) {
+    const error = validateInstagramHandle(ig_handle)
+    if (error) errors.push(error)
+  }
+  
+  if (website) {
+    const error = validateWebsite(website)
+    if (error) errors.push(error)
+  }
+  
+  return { valid: errors.length === 0, errors }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get the authenticated user from Clerk
@@ -16,6 +101,12 @@ export async function POST(request: NextRequest) {
     
     if (!username || typeof username !== 'string' || username.trim().length === 0) {
       return NextResponse.json({ error: "Username is required" }, { status: 400 })
+    }
+
+    // Validate social media fields
+    const validation = validateSocialMediaFields(linkedin, twitter_handle, ig_handle, website)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.errors.join('; ') }, { status: 400 })
     }
 
     // Create Supabase client
@@ -106,6 +197,12 @@ export async function PUT(request: NextRequest) {
     
     if (!username || typeof username !== 'string' || username.trim().length === 0) {
       return NextResponse.json({ error: "Username is required" }, { status: 400 })
+    }
+
+    // Validate social media fields
+    const validation = validateSocialMediaFields(linkedin, twitter_handle, ig_handle, website)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.errors.join('; ') }, { status: 400 })
     }
 
     // Create Supabase client

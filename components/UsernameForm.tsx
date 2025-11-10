@@ -18,6 +18,12 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<{
+    linkedin?: string
+    twitterHandle?: string
+    igHandle?: string
+    website?: string
+  }>({})
   const { user } = useUser()
 
   useEffect(() => {
@@ -45,6 +51,83 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
     }
   }
 
+  const validateUrl = (url: string): boolean => {
+    if (!url.trim()) return true // Empty is valid (optional field)
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const validateLinkedIn = (url: string): string | undefined => {
+    if (!url.trim()) return undefined // Empty is valid
+    if (!validateUrl(url)) {
+      return 'Please enter a valid URL'
+    }
+    try {
+      const urlObj = new URL(url)
+      if (!urlObj.hostname.includes('linkedin.com')) {
+        return 'Please enter a valid LinkedIn URL'
+      }
+    } catch {
+      return 'Please enter a valid URL'
+    }
+    return undefined
+  }
+
+  const validateTwitterHandle = (handle: string): string | undefined => {
+    if (!handle.trim()) return undefined // Empty is valid
+    const cleanHandle = handle.trim().replace(/^@/, '')
+    if (cleanHandle.length < 1 || cleanHandle.length > 15) {
+      return 'Twitter handle must be 1-15 characters'
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(cleanHandle)) {
+      return 'Twitter handle can only contain letters, numbers, and underscores'
+    }
+    return undefined
+  }
+
+  const validateInstagramHandle = (handle: string): string | undefined => {
+    if (!handle.trim()) return undefined // Empty is valid
+    const cleanHandle = handle.trim().replace(/^@/, '')
+    if (cleanHandle.length < 1 || cleanHandle.length > 30) {
+      return 'Instagram handle must be 1-30 characters'
+    }
+    if (!/^[a-zA-Z0-9_.]+$/.test(cleanHandle)) {
+      return 'Instagram handle can only contain letters, numbers, underscores, and periods'
+    }
+    return undefined
+  }
+
+  const validateWebsite = (url: string): string | undefined => {
+    if (!url.trim()) return undefined // Empty is valid
+    if (!validateUrl(url)) {
+      return 'Please enter a valid URL (must include http:// or https://)'
+    }
+    return undefined
+  }
+
+  const validateAllFields = (): boolean => {
+    const errors: typeof fieldErrors = {}
+    
+    const linkedinError = validateLinkedIn(linkedin)
+    if (linkedinError) errors.linkedin = linkedinError
+    
+    const twitterError = validateTwitterHandle(twitterHandle)
+    if (twitterError) errors.twitterHandle = twitterError
+    
+    const igError = validateInstagramHandle(igHandle)
+    if (igError) errors.igHandle = igError
+    
+    const websiteError = validateWebsite(website)
+    if (websiteError) errors.website = websiteError
+    
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -55,6 +138,12 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
 
     if (mode === 'update' && username.trim() === currentUsername) {
       setError('New username must be different from current username')
+      return
+    }
+
+    // Validate all social media fields
+    if (!validateAllFields()) {
+      setError('Please fix the validation errors below')
       return
     }
 
@@ -159,25 +248,39 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             type="url"
             id="linkedin"
             value={linkedin}
-            onChange={(e) => setLinkedin(e.target.value)}
+            onChange={(e) => {
+              setLinkedin(e.target.value)
+              if (fieldErrors.linkedin) {
+                setFieldErrors({ ...fieldErrors, linkedin: undefined })
+              }
+            }}
             placeholder="https://linkedin.com/in/yourprofile"
             className="w-full px-4 py-3 rounded-xl transition-all duration-200"
             style={{
-              border: '1.5px solid var(--border-gentle)',
+              border: `1.5px solid ${fieldErrors.linkedin ? '#dc3545' : 'var(--border-gentle)'}`,
               background: 'var(--background-card)',
               color: 'var(--foreground)',
               fontSize: '1rem'
             }}
             disabled={loading}
             onFocus={(e) => {
-              e.target.style.borderColor = 'var(--accent-green)';
-              e.target.style.boxShadow = '0 0 0 3px rgba(157, 181, 161, 0.15)';
+              e.target.style.borderColor = fieldErrors.linkedin ? '#dc3545' : 'var(--accent-green)';
+              e.target.style.boxShadow = fieldErrors.linkedin ? '0 0 0 3px rgba(220, 53, 69, 0.15)' : '0 0 0 3px rgba(157, 181, 161, 0.15)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = 'var(--border-gentle)';
+              const error = validateLinkedIn(linkedin)
+              if (error) {
+                setFieldErrors({ ...fieldErrors, linkedin: error })
+              }
+              e.target.style.borderColor = error ? '#dc3545' : 'var(--border-gentle)';
               e.target.style.boxShadow = 'none';
             }}
           />
+          {fieldErrors.linkedin && (
+            <p className="text-sm mt-1" style={{ color: '#dc3545' }}>
+              {fieldErrors.linkedin}
+            </p>
+          )}
         </div>
 
         <div>
@@ -192,11 +295,16 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             type="text"
             id="twitter_handle"
             value={twitterHandle}
-            onChange={(e) => setTwitterHandle(e.target.value)}
+            onChange={(e) => {
+              setTwitterHandle(e.target.value)
+              if (fieldErrors.twitterHandle) {
+                setFieldErrors({ ...fieldErrors, twitterHandle: undefined })
+              }
+            }}
             placeholder="@yourhandle"
             className="w-full px-4 py-3 rounded-xl transition-all duration-200"
             style={{
-              border: '1.5px solid var(--border-gentle)',
+              border: `1.5px solid ${fieldErrors.twitterHandle ? '#dc3545' : 'var(--border-gentle)'}`,
               background: 'var(--background-card)',
               color: 'var(--foreground)',
               fontSize: '1rem'
@@ -204,14 +312,23 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             disabled={loading}
             maxLength={50}
             onFocus={(e) => {
-              e.target.style.borderColor = 'var(--accent-green)';
-              e.target.style.boxShadow = '0 0 0 3px rgba(157, 181, 161, 0.15)';
+              e.target.style.borderColor = fieldErrors.twitterHandle ? '#dc3545' : 'var(--accent-green)';
+              e.target.style.boxShadow = fieldErrors.twitterHandle ? '0 0 0 3px rgba(220, 53, 69, 0.15)' : '0 0 0 3px rgba(157, 181, 161, 0.15)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = 'var(--border-gentle)';
+              const error = validateTwitterHandle(twitterHandle)
+              if (error) {
+                setFieldErrors({ ...fieldErrors, twitterHandle: error })
+              }
+              e.target.style.borderColor = error ? '#dc3545' : 'var(--border-gentle)';
               e.target.style.boxShadow = 'none';
             }}
           />
+          {fieldErrors.twitterHandle && (
+            <p className="text-sm mt-1" style={{ color: '#dc3545' }}>
+              {fieldErrors.twitterHandle}
+            </p>
+          )}
         </div>
 
         <div>
@@ -226,11 +343,16 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             type="text"
             id="ig_handle"
             value={igHandle}
-            onChange={(e) => setIgHandle(e.target.value)}
+            onChange={(e) => {
+              setIgHandle(e.target.value)
+              if (fieldErrors.igHandle) {
+                setFieldErrors({ ...fieldErrors, igHandle: undefined })
+              }
+            }}
             placeholder="@yourhandle"
             className="w-full px-4 py-3 rounded-xl transition-all duration-200"
             style={{
-              border: '1.5px solid var(--border-gentle)',
+              border: `1.5px solid ${fieldErrors.igHandle ? '#dc3545' : 'var(--border-gentle)'}`,
               background: 'var(--background-card)',
               color: 'var(--foreground)',
               fontSize: '1rem'
@@ -238,14 +360,23 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             disabled={loading}
             maxLength={50}
             onFocus={(e) => {
-              e.target.style.borderColor = 'var(--accent-green)';
-              e.target.style.boxShadow = '0 0 0 3px rgba(157, 181, 161, 0.15)';
+              e.target.style.borderColor = fieldErrors.igHandle ? '#dc3545' : 'var(--accent-green)';
+              e.target.style.boxShadow = fieldErrors.igHandle ? '0 0 0 3px rgba(220, 53, 69, 0.15)' : '0 0 0 3px rgba(157, 181, 161, 0.15)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = 'var(--border-gentle)';
+              const error = validateInstagramHandle(igHandle)
+              if (error) {
+                setFieldErrors({ ...fieldErrors, igHandle: error })
+              }
+              e.target.style.borderColor = error ? '#dc3545' : 'var(--border-gentle)';
               e.target.style.boxShadow = 'none';
             }}
           />
+          {fieldErrors.igHandle && (
+            <p className="text-sm mt-1" style={{ color: '#dc3545' }}>
+              {fieldErrors.igHandle}
+            </p>
+          )}
         </div>
 
         <div>
@@ -260,25 +391,39 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
             type="url"
             id="website"
             value={website}
-            onChange={(e) => setWebsite(e.target.value)}
+            onChange={(e) => {
+              setWebsite(e.target.value)
+              if (fieldErrors.website) {
+                setFieldErrors({ ...fieldErrors, website: undefined })
+              }
+            }}
             placeholder="https://yourwebsite.com"
             className="w-full px-4 py-3 rounded-xl transition-all duration-200"
             style={{
-              border: '1.5px solid var(--border-gentle)',
+              border: `1.5px solid ${fieldErrors.website ? '#dc3545' : 'var(--border-gentle)'}`,
               background: 'var(--background-card)',
               color: 'var(--foreground)',
               fontSize: '1rem'
             }}
             disabled={loading}
             onFocus={(e) => {
-              e.target.style.borderColor = 'var(--accent-green)';
-              e.target.style.boxShadow = '0 0 0 3px rgba(157, 181, 161, 0.15)';
+              e.target.style.borderColor = fieldErrors.website ? '#dc3545' : 'var(--accent-green)';
+              e.target.style.boxShadow = fieldErrors.website ? '0 0 0 3px rgba(220, 53, 69, 0.15)' : '0 0 0 3px rgba(157, 181, 161, 0.15)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = 'var(--border-gentle)';
+              const error = validateWebsite(website)
+              if (error) {
+                setFieldErrors({ ...fieldErrors, website: error })
+              }
+              e.target.style.borderColor = error ? '#dc3545' : 'var(--border-gentle)';
               e.target.style.boxShadow = 'none';
             }}
           />
+          {fieldErrors.website && (
+            <p className="text-sm mt-1" style={{ color: '#dc3545' }}>
+              {fieldErrors.website}
+            </p>
+          )}
         </div>
 
         {error && (

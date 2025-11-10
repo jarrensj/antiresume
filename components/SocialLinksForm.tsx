@@ -1,6 +1,7 @@
 'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { normalizeUrl } from '@/app/lib/socials'
 
 type SocialFieldKey = 'linkedin' | 'twitter_handle' | 'ig_handle' | 'website'
 
@@ -66,6 +67,13 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
     setError('')
   }
 
+  const handleUrlBlur = (field: 'linkedin' | 'website') => () => {
+    setSocials((prev) => ({
+      ...prev,
+      [field]: normalizeUrl(prev[field]),
+    }))
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -74,7 +82,9 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
     setSuccess('')
 
     const payload = (Object.keys(socials) as SocialFieldKey[]).reduce<Record<string, string>>((acc, key) => {
-      acc[key] = socials[key].trim()
+      const value = socials[key].trim()
+      // Normalize URLs for linkedin and website
+      acc[key] = (key === 'linkedin' || key === 'website') ? normalizeUrl(value) : value
       return acc
     }, {})
 
@@ -146,11 +156,11 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
               LinkedIn
             </label>
             <input
-              type="url"
+              type="text"
               id="linkedin"
               value={socials.linkedin}
               onChange={handleChange('linkedin')}
-              placeholder="https://linkedin.com/in/yourprofile"
+              placeholder="linkedin.com/in/yourprofile"
               className="w-full px-4 py-3 rounded-xl transition-all duration-200"
               style={{
                 border: '1.5px solid var(--border-gentle)',
@@ -166,6 +176,7 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
               onBlur={(e) => {
                 e.target.style.borderColor = 'var(--border-gentle)'
                 e.target.style.boxShadow = 'none'
+                handleUrlBlur('linkedin')()
               }}
             />
           </div>
@@ -247,11 +258,11 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
               Website
             </label>
             <input
-              type="url"
+              type="text"
               id="website"
               value={socials.website}
               onChange={handleChange('website')}
-              placeholder="https://yourwebsite.com"
+              placeholder="yourwebsite.com"
               className="w-full px-4 py-3 rounded-xl transition-all duration-200"
               style={{
                 border: '1.5px solid var(--border-gentle)',
@@ -267,6 +278,7 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
               onBlur={(e) => {
                 e.target.style.borderColor = 'var(--border-gentle)'
                 e.target.style.boxShadow = 'none'
+                handleUrlBlur('website')()
               }}
             />
           </div>

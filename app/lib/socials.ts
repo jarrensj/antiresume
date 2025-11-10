@@ -37,3 +37,23 @@ export const emptySocialFields = (): SocialFields => ({
   website: null,
 })
 
+/**
+ * Normalizes a URL by prepending https:// if no protocol is present
+ */
+export const normalizeUrl = (url: string): string => {
+  const trimmed = url.trim()
+  if (!trimmed) return trimmed
+  
+  // Check if it already has a protocol
+  if (trimmed.match(/^https?:\/\//i)) {
+    return trimmed
+  }
+  
+  // Prepend https:// if it looks like a URL (has a dot)
+  if (trimmed.includes('.')) {
+    return `https://${trimmed}`
+  }
+  
+  return trimmed
+}
+

@@ -27,6 +27,7 @@ export default function Home() {
   const [showResetDialog, setShowResetDialog] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
+  const [copied, setCopied] = useState(false)
 
   // Fetch user profile when component mounts
   useEffect(() => {
@@ -64,6 +65,20 @@ export default function Home() {
         }
       })
       .finally(() => setLoading(false))
+  }
+
+  const handleCopyLink = async () => {
+    if (!userProfile) return
+    
+    const fullUrl = `${window.location.origin}/${userProfile.username}`
+    
+    try {
+      await navigator.clipboard.writeText(fullUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
   }
 
   const handleResetProfile = async () => {
@@ -220,14 +235,52 @@ export default function Home() {
                 >
                   {showWalletForm ? 'Cancel' : 'Manage Wallet Addresses'}
                 </button>
-                <a
-                  href={`/${userProfile.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-base btn-sage no-underline"
-                >
-                  View Public Profile
-                </a>
+                <div className="flex gap-2 items-center">
+                  <a
+                    href={`/${userProfile.username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2.5 text-white font-medium rounded-xl transition-all duration-200 no-underline"
+                    style={{ 
+                      background: 'var(--accent-sage)',
+                      border: '1.5px solid var(--accent-sage)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--accent-green)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'var(--accent-sage)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    View Public Profile
+                  </a>
+                  <button
+                    onClick={handleCopyLink}
+                    className="p-2.5 text-white rounded-xl transition-all duration-200"
+                    style={{ 
+                      background: copied ? 'var(--accent-green)' : 'var(--accent-sage)',
+                      border: '1.5px solid transparent',
+                      fontSize: '1.2rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!copied) {
+                        e.currentTarget.style.background = 'var(--accent-green)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!copied) {
+                        e.currentTarget.style.background = 'var(--accent-sage)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }
+                    }}
+                    title={copied ? 'Copied!' : 'Copy profile link'}
+                  >
+                    {copied ? '✓' : '📋'}
+                  </button>
+                </div>
                 <button
                   onClick={() => setShowResetDialog(true)}
                   className="btn-base btn-danger"

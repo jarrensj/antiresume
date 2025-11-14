@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { use, useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import PublicTweetCard from '@/components/PublicTweetCard'
 import { Linkedin, Twitter, Instagram, Globe, Copy, Check } from 'lucide-react'
@@ -38,31 +38,28 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [copiedWallet, setCopiedWallet] = useState<'evm' | 'solana' | null>(null)
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    async function fetchProfile() {
       try {
         const response = await fetch(`/api/profile/${resolvedParams.username}`)
-        
-        if (response.status === 404) {
-          notFound()
+        if (!response.ok) {
+          if (response.status === 404) {
+            setProfile(null)
+          } else {
+            setError('Failed to load profile')
+          }
+          setLoading(false)
           return
         }
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile')
-        }
-        
         const data = await response.json()
-        setProfile(data.profile)
+        setProfile(data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        console.error('Error fetching profile:', err)
+        setError('Failed to load profile')
       } finally {
         setLoading(false)
       }
     }
-
-    if (resolvedParams.username) {
-      fetchProfile()
-    }
+    fetchProfile()
   }, [resolvedParams.username])
 
   if (loading) {
@@ -90,7 +87,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   }
 
   if (!profile) {
-    return notFound()
+    notFound()
   }
 
   const getSocialLinks = () => {

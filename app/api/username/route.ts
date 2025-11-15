@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       const updateData: Record<string, string | null> = {
         username: trimmedUsername,
         updated_at: timestamp,
+        username_last_changed_at: timestamp,
       }
 
       Object.assign(updateData, socialFields)
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
         username: trimmedUsername,
         created_at: timestamp,
         updated_at: timestamp,
+        username_last_changed_at: timestamp,
       }
 
       Object.assign(insertData, socialFields)
@@ -123,7 +125,7 @@ export async function PUT(request: NextRequest) {
     // Check if the user has an existing profile
     const { data: existingProfile } = await supabase
       .from('user_profiles')
-      .select('username')
+      .select('username, username_last_changed_at')
       .eq('clerk_user_id', userId)
       .single()
 
@@ -134,6 +136,34 @@ export async function PUT(request: NextRequest) {
     // Check if the new username is different from current username
     if (existingProfile.username === trimmedUsername) {
       return NextResponse.json({ error: "New username must be different from current username" }, { status: 400 })
+    }
+
+    // Check if 3 days have passed since last username change
+    if (existingProfile.username_last_changed_at) {
+      const lastChanged = new Date(existingProfile.username_last_changed_at)
+      const now = new Date()
+      const threeDaysInMs = 3 * 24 * 60 * 60 * 1000 // 3 days in milliseconds
+      const timeSinceLastChange = now.getTime() - lastChanged.getTime()
+      
+      if (timeSinceLastChange < threeDaysInMs) {
+        const timeRemaining = threeDaysInMs - timeSinceLastChange
+        const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000))
+        const hoursRemaining = Math.ceil(timeRemaining / (60 * 60 * 1000))
+        
+        let timeMessage: string
+        if (daysRemaining > 1) {
+          timeMessage = `${daysRemaining} days`
+        } else if (hoursRemaining > 1) {
+          timeMessage = `${hoursRemaining} hours`
+        } else {
+          timeMessage = "less than 1 hour"
+        }
+        
+        return NextResponse.json({ 
+          error: `You can only change your username once every 3 days. Please try again in ${timeMessage}.`,
+          timeRemaining: timeRemaining
+        }, { status: 429 })
+      }
     }
     
     // Check if new username already exists (but not for current user)
@@ -153,6 +183,7 @@ export async function PUT(request: NextRequest) {
     const updateData: Record<string, string | null> = {
       username: trimmedUsername,
       updated_at: timestamp,
+      username_last_changed_at: timestamp,
     }
 
     Object.assign(updateData, socialFields)

@@ -32,6 +32,7 @@ export interface UserProfile {
   solana_wallet_address?: string
   created_at: string
   updated_at: string
+  username_last_changed_at?: string
 }
 
 export interface Resume {

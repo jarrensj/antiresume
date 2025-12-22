@@ -8,7 +8,7 @@ import ResumeForm from '@/components/ResumeForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
-import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X } from 'lucide-react'
+import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
 
 interface UserProfile {
@@ -397,6 +397,28 @@ export default function Home() {
                   build your antiresume
                 </Link>
               </div>
+              
+              <div className="md:col-span-1">
+                <h4 className="font-noto font-medium text-charcoal-800 mb-4">Socials</h4>
+                <div className="space-y-2">
+                  <a 
+                    href="https://x.com/antiresume" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block text-sm text-charcoal-600 hover:text-sage-500 transition-colors"
+                  >
+                    X
+                  </a>
+                  <a 
+                    href="https://instagram.com/antiresume" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block text-sm text-charcoal-600 hover:text-sage-500 transition-colors"
+                  >
+                    Instagram
+                  </a>
+                </div>
+              </div>
             </div>
             
             <div className="border-t border-charcoal-200 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center">
@@ -419,7 +441,7 @@ export default function Home() {
             className="fixed top-6 left-6 z-50 p-2 rounded-lg bg-matcha-cream border-2 border-sage-300 hover:bg-sage-100 transition-all duration-200"
             aria-label="Toggle menu"
           >
-            {sidebarOpen ? <X className="w-6 h-6 text-charcoal-700" /> : <Menu className="w-6 h-6 text-charcoal-700" />}
+            {sidebarOpen ? <CloseIcon className="w-6 h-6 text-charcoal-700" /> : <Menu className="w-6 h-6 text-charcoal-700" />}
           </button>
         )}
 

@@ -143,12 +143,12 @@ export default function Home() {
 
             {/* Main content */}
             <h1 className="text-4xl md:text-6xl font-noto font-light text-charcoal-800 mb-6 leading-tight">
-              Better than a resume.<br />
-              <span className="font-medium text-sage-500">Show what&apos;s real.</span>
+              antiresume<br />
+              <span className="font-medium text-sage-500">Leverage your digital footprint.</span>
             </h1>
             
             <p className="text-xl text-charcoal-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              People can lie on their resume. The antiresume is different — it&apos;s build out of genuine interactions, public and real wins, and concrete online evidence of how great you are.
+              A resume is written by the author. The antiresume is built out of genuine interactions, public and real wins, and concrete online evidence of how impactful you are.
             </p>
 
             {/* CTA Button */}
@@ -180,10 +180,10 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-noto font-medium text-charcoal-800 mb-2">
-                    Your actual work
+                    Your impact
                   </h3>
                   <p className="text-charcoal-600 leading-relaxed">
-                    Not bullet points about responsibilities — links to posts about real projects, code repositories, and things you&apos;ve shipped.
+                    Not bullet points about responsibilities written by the author — links to posts about real projects, code repositories, and things you&apos;ve shipped and impacts that you&apos;ve made.
                   </p>
                 </div>
               </div>

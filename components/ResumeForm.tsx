@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Tweet, Resume } from '@/app/lib/db'
 import TweetCard from '@/components/TweetCard'
+import { detectPostPlatform } from '@/app/lib/utils'
 
 interface ResumeFormProps {
   onResumeUpdated?: () => void
@@ -127,16 +128,20 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
   const validateTweets = () => {
     const validTweets = tweets.filter(tweet => tweet.tweet_link.trim() !== '')
     if (validTweets.length === 0) {
-      setError('At least one tweet link is required')
+      setError('At least one post link is required')
       return false
     }
 
-    // Basic URL validation
     for (const tweet of validTweets) {
       try {
         new URL(tweet.tweet_link)
       } catch {
-        setError('Please enter valid URLs for tweet links')
+        setError('Please enter valid URLs for post links')
+        return false
+      }
+
+      if (detectPostPlatform(tweet.tweet_link) === 'unknown') {
+        setError('Only X/Twitter and Instagram post URLs are supported')
         return false
       }
     }
@@ -246,7 +251,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
             {resume ? 'Edit Resume' : 'Create Resume'}
           </h2>
           <p className="text-secondary">
-            Add tweet links to showcase your thoughts and insights
+            Add X/Twitter or Instagram post links to showcase your thoughts and insights
           </p>
         </div>
         {resume && (
@@ -282,7 +287,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                   </div>
                 )}
                 <h3 className="text-xl font-medium heading-handwritten">
-                  Tweet #{index + 1}
+                  Post #{index + 1}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -329,13 +334,13 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
               <div className="flex-1 min-w-0 space-y-4">
                 <div className="space-y-3">
                   <label className="form-label">
-                    Tweet Link *
+                    Post Link *
                   </label>
                   <input
                     type="url"
                     value={tweet.tweet_link}
                     onChange={(e) => updateTweet(index, 'tweet_link', e.target.value)}
-                    placeholder="https://twitter.com/username/status/…"
+                    placeholder="https://x.com/… or https://instagram.com/p/…"
                     className="input-field"
                     disabled={loading}
                   />
@@ -348,7 +353,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                   <textarea
                     value={tweet.notes || ''}
                     onChange={(e) => updateTweet(index, 'notes', e.target.value)}
-                    placeholder="Add your thoughts about this tweet…"
+                    placeholder="Add your thoughts about this post…"
                     rows={3}
                     className="textarea-field"
                     disabled={loading}
@@ -380,7 +385,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
                     background: 'var(--background-card)',
                     color: 'var(--foreground-secondary)'
                   }}>
-                    Add a tweet link to see the preview
+                    Add a post link to see the preview
                   </div>
                 )}
               </div>
@@ -395,7 +400,7 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
             className="btn-base btn-secondary"
             disabled={loading}
           >
-            Add Another Tweet
+            Add Another Post
           </button>
 
           <button

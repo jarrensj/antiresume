@@ -10,6 +10,8 @@ import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
 import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface UserProfile {
   id: string
@@ -470,48 +472,51 @@ export default function Home() {
               // Show profile dashboard when no form is active
               <>
                 <div className="mb-10">
-                  <h1 className="text-5xl font-bold mb-3 heading-handwritten">
+                  <h1 className="text-5xl font-bold mb-3">
                     Welcome back, {userProfile.username}!
                   </h1>
-                  <p className="text-lg text-secondary">
+                  <p className="text-lg text-muted-foreground">
                     Edit your profile
                   </p>
                 </div>
 
-                <div className="card p-8 mb-8">
-                  <h2 className="text-2xl font-semibold mb-6 heading-handwritten">
-                    Your Profile
-                  </h2>
-                  <div className="text-left space-y-4 mb-8">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-medium" style={{ color: 'var(--foreground)' }}>Username:</span>
-                      <span className="text-secondary">{userProfile.username}</span>
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Your Profile</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-left space-y-4 mb-6">
+                      <div className="flex items-center space-x-3">
+                        <span className="font-medium text-foreground">Username:</span>
+                        <span className="text-muted-foreground">{userProfile.username}</span>
+                      </div>
+                      <div className="flex items-center space-x-3 flex-wrap">
+                        <span className="font-medium text-foreground">Profile URL:</span>
+                        <a
+                          href={`/${userProfile.username}`}
+                          className="text-primary underline-offset-4 hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          /{userProfile.username}
+                        </a>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-3 flex-wrap">
-                      <span className="font-medium" style={{ color: 'var(--foreground)' }}>Profile URL:</span>
-                      <a 
-                        href={`/${userProfile.username}`}
-                        className="profile-link"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        /{userProfile.username}
-                      </a>
+
+                    <div className="flex justify-center">
+                      <Button variant="secondary" asChild>
+                        <a
+                          href={`/${userProfile.username}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          View Public Profile
+                        </a>
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="flex gap-2 flex-wrap justify-center">
-                    <a
-                      href={`/${userProfile.username}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-base btn-sage no-underline text-sm px-3 py-2 gap-1.5"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      View Public Profile
-                    </a>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </>
             ) : (
               // Show only the active form

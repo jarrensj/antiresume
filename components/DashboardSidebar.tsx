@@ -1,5 +1,8 @@
 import { ComponentType } from 'react'
 import { User, Edit3, FileType, Share2, Wallet, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 type IconType = ComponentType<{ className?: string }>
 
@@ -7,7 +10,6 @@ interface NavItem {
   label: string
   icon: IconType
   onClick: () => void
-  variant?: 'danger'
 }
 
 interface DashboardSidebarProps {
@@ -37,50 +39,43 @@ export default function DashboardSidebar({
     { label: 'Wallets', icon: Wallet, onClick: onWalletsClick },
   ]
 
-  const buttonBaseClasses =
-    'w-full px-3 py-2.5 rounded-xl transition-colors duration-200 text-left text-charcoal-600 hover:text-charcoal-800'
-  const buttonHoverClasses = 'hover:bg-sage-50'
-  const dangerClasses =
-    'text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors duration-200'
-
   return (
-    <div
-      className={`fixed top-0 left-0 h-full w-72 bg-matcha-cream border-r-2 border-sage-300 z-40 transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+    <aside
+      className={cn(
+        'fixed left-0 top-0 z-40 h-full w-72 transform border-r border-border bg-card transition-transform duration-300 ease-in-out',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+      )}
     >
       <div className="p-6 pt-20">
-        <h2 className="text-lg font-noto font-semibold text-charcoal-800 mb-5 tracking-tight">
+        <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Manage Profile
         </h2>
 
-        <nav className="space-y-1.5">
+        <nav className="space-y-1">
           {navItems.map(({ label, icon: Icon, onClick }) => (
-            <button
+            <Button
               key={label}
+              variant="ghost"
               onClick={onClick}
-              className={`${buttonBaseClasses} ${buttonHoverClasses}`}
+              className="w-full justify-start"
             >
-              <span className="w-full inline-flex items-center gap-2.5">
-                <Icon className="w-4 h-4 flex-shrink-0 text-sage-600" />
-                <span className="font-medium text-sm tracking-tight">{label}</span>
-              </span>
-            </button>
+              <Icon className="h-4 w-4" />
+              {label}
+            </Button>
           ))}
 
-          <div className="pt-4 mt-4 border-t border-sage-200">
-            <button
-              onClick={onResetClick}
-              className={`w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium ${dangerClasses}`}
-            >
-              <span className="w-full inline-flex items-center gap-2.5">
-                <Trash2 className="w-4 h-4 flex-shrink-0 text-red-500" />
-                <span className="tracking-tight">Reset Profile</span>
-              </span>
-            </button>
-          </div>
+          <Separator className="my-4" />
+
+          <Button
+            variant="ghost"
+            onClick={onResetClick}
+            className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+            Reset Profile
+          </Button>
         </nav>
       </div>
-    </div>
+    </aside>
   )
 }

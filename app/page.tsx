@@ -10,7 +10,7 @@ import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
 import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface UserProfile {
@@ -504,16 +504,15 @@ export default function Home() {
                     </div>
 
                     <div className="flex justify-center">
-                      <Button variant="secondary" asChild>
-                        <a
-                          href={`/${userProfile.username}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          View Public Profile
-                        </a>
-                      </Button>
+                      <a
+                        href={`/${userProfile.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={buttonVariants({ variant: 'secondary' })}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        View Public Profile
+                      </a>
                     </div>
                   </CardContent>
                 </Card>

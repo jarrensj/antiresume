@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface ConfirmDialogProps {
@@ -70,19 +69,15 @@ export default function ConfirmDialog({
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel asChild>
-            <Button variant="outline" onClick={onCancel} disabled={isLoading}>
-              {cancelText}
-            </Button>
+          <AlertDialogCancel onClick={onCancel} disabled={isLoading}>
+            {cancelText}
           </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button
-              variant={variant === 'danger' ? 'destructive' : 'default'}
-              onClick={onConfirm}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Processing…' : confirmText}
-            </Button>
+          <AlertDialogAction
+            variant={variant === 'danger' ? 'destructive' : 'default'}
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Processing…' : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

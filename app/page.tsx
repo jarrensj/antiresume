@@ -8,7 +8,7 @@ import ResumeForm from '@/components/ResumeForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
-import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
+import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon, Plus } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
 
 interface UserProfile {
@@ -31,6 +31,7 @@ export default function Home() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [resumePostCount, setResumePostCount] = useState<number | null>(null)
 
   const closeSidebar = () => setSidebarOpen(false)
 
@@ -66,7 +67,7 @@ export default function Home() {
       try {
         const response = await fetch('/api/username')
         const data = await response.json()
-        
+
         if (response.ok && data.profile) {
           setUserProfile(data.profile)
         }
@@ -79,6 +80,31 @@ export default function Home() {
 
     fetchUserProfile()
   }, [])
+
+  const refreshResumeCount = async () => {
+    try {
+      const res = await fetch('/api/resume')
+      if (!res.ok) {
+        setResumePostCount(0)
+        return
+      }
+      const data = await res.json()
+      const tweets = data?.resume?.tweets
+      setResumePostCount(Array.isArray(tweets) ? tweets.length : 0)
+    } catch {
+      setResumePostCount(0)
+    }
+  }
+
+  // Once we know the viewer has a profile, fetch their resume to drive the
+  // empty-state nudge on the dashboard.
+  useEffect(() => {
+    if (!userProfile) {
+      setResumePostCount(null)
+      return
+    }
+    refreshResumeCount()
+  }, [userProfile])
 
   const handleUsernameSet = (username: string) => {
     // Refresh the profile data
@@ -512,6 +538,28 @@ export default function Home() {
                     </a>
                   </div>
                 </div>
+
+                {resumePostCount === 0 && (
+                  <div
+                    className="card p-8 mb-8 text-center"
+                    style={{ borderStyle: 'dashed' }}
+                  >
+                    <h2 className="text-2xl font-semibold mb-3 heading-handwritten">
+                      Your post stack is empty
+                    </h2>
+                    <p className="text-secondary mb-6">
+                      Add an X/Twitter or Instagram link to show what you&apos;ve been up to.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleSectionNav('resume')}
+                      className="inline-flex items-center gap-2 btn-base btn-primary px-6"
+                    >
+                      <Plus size={16} />
+                      Add your first post
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               // Show only the active form
@@ -528,12 +576,7 @@ export default function Home() {
 
                 {showResumeForm && (
                   <div className="mb-8">
-                    <ResumeForm
-                      onResumeUpdated={() => {
-                        // Optionally refresh or show success message
-                        console.log('Resume updated!')
-                      }}
-                    />
+                    <ResumeForm onResumeUpdated={refreshResumeCount} />
                   </div>
                 )}
 

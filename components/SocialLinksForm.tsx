@@ -2,9 +2,14 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { ensureHttpsProtocol } from '@/app/lib/utils'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type SocialFieldKey = 'linkedin' | 'twitter_handle' | 'ig_handle' | 'website'
-
 type SocialLinksState = Record<SocialFieldKey, string>
 
 interface SocialLinksFormProps {
@@ -59,33 +64,22 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
   }, [])
 
   const handleChange = (field: SocialFieldKey) => (event: ChangeEvent<HTMLInputElement>) => {
-    setSocials((prev) => ({
-      ...prev,
-      [field]: event.target.value,
-    }))
+    setSocials((prev) => ({ ...prev, [field]: event.target.value }))
     setSuccess('')
     setError('')
   }
 
   const handleBlur = (field: SocialFieldKey) => (event: ChangeEvent<HTMLInputElement>) => {
-    // Auto-add https:// protocol to URL fields when user leaves the input
     if (field === 'website' || field === 'linkedin') {
       const value = event.target.value.trim()
       if (value) {
-        setSocials((prev) => ({
-          ...prev,
-          [field]: ensureHttpsProtocol(value),
-        }))
+        setSocials((prev) => ({ ...prev, [field]: ensureHttpsProtocol(value) }))
       }
     }
-    // Remove @ symbol from Twitter and Instagram handles if present
     if (field === 'twitter_handle' || field === 'ig_handle') {
       const value = event.target.value.trim()
       if (value) {
-        setSocials((prev) => ({
-          ...prev,
-          [field]: value.startsWith('@') ? value.slice(1) : value,
-        }))
+        setSocials((prev) => ({ ...prev, [field]: value.startsWith('@') ? value.slice(1) : value }))
       }
     }
   }
@@ -93,10 +87,11 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
   const isValidUrl = (urlString: string): boolean => {
     try {
       const url = new URL(urlString)
-      // Check if it has a valid protocol and a domain with at least a TLD
-      return (url.protocol === 'http:' || url.protocol === 'https:') && 
-             url.hostname.includes('.') &&
-             url.hostname.length > 3
+      return (
+        (url.protocol === 'http:' || url.protocol === 'https:') &&
+        url.hostname.includes('.') &&
+        url.hostname.length > 3
+      )
     } catch {
       return false
     }
@@ -104,49 +99,39 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
     setSubmitting(true)
     setError('')
     setSuccess('')
 
-    // Validate URL fields before submitting
     const websiteValue = socials.website.trim()
     const linkedinValue = socials.linkedin.trim()
 
-    if (websiteValue) {
-      const normalizedWebsite = ensureHttpsProtocol(websiteValue)
-      if (!isValidUrl(normalizedWebsite)) {
-        setError('Please enter a valid website URL (e.g., example.com or https://example.com)')
-        setSubmitting(false)
-        return
-      }
+    if (websiteValue && !isValidUrl(ensureHttpsProtocol(websiteValue))) {
+      setError('Please enter a valid website URL (e.g., example.com or https://example.com)')
+      setSubmitting(false)
+      return
+    }
+    if (linkedinValue && !isValidUrl(ensureHttpsProtocol(linkedinValue))) {
+      setError('Please enter a valid LinkedIn URL (e.g., linkedin.com/in/yourprofile)')
+      setSubmitting(false)
+      return
     }
 
-    if (linkedinValue) {
-      const normalizedLinkedin = ensureHttpsProtocol(linkedinValue)
-      if (!isValidUrl(normalizedLinkedin)) {
-        setError('Please enter a valid LinkedIn URL (e.g., linkedin.com/in/yourprofile)')
-        setSubmitting(false)
-        return
-      }
-    }
-
-    const payload = (Object.keys(socials) as SocialFieldKey[]).reduce<Record<string, string>>((acc, key) => {
-      acc[key] = socials[key].trim()
-      return acc
-    }, {})
+    const payload = (Object.keys(socials) as SocialFieldKey[]).reduce<Record<string, string>>(
+      (acc, key) => {
+        acc[key] = socials[key].trim()
+        return acc
+      },
+      {},
+    )
 
     try {
       const response = await fetch('/api/socials', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-
       const data = await response.json()
-
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update social links')
       }
@@ -157,7 +142,6 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
         ig_handle: data.socials.ig_handle ?? '',
         website: data.socials.website ?? '',
       }
-
       setSocials(updatedSocials)
       setSuccess('Social links updated successfully!')
       onSocialsUpdated?.(updatedSocials)
@@ -170,126 +154,105 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
   }
 
   return (
-    <div className="max-w-md mx-auto card p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-3 heading-handwritten">
-          Social Links
-        </h2>
-        <p className="text-secondary">
-          Share where people can find you online
-        </p>
-      </div>
-
-      {loading ? (
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto loading-spinner"></div>
-          <p className="mt-4 text-sm loading-text">
-            Loading social links…
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="linkedin" className="form-label">
-              LinkedIn
-            </label>
-            <input
-              type="text"
-              id="linkedin"
-              value={socials.linkedin}
-              onChange={handleChange('linkedin')}
-              onBlur={handleBlur('linkedin')}
-              placeholder="https://linkedin.com/in/yourprofile"
-              className="input-field"
-              disabled={submitting}
-            />
+    <Card className="mx-auto max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle className="text-3xl">Social Links</CardTitle>
+        <CardDescription>Share where people can find you online</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
           </div>
-
-          <div>
-            <label htmlFor="twitter_handle" className="form-label">
-              Twitter Handle
-            </label>
-            <input
-              type="text"
-              id="twitter_handle"
-              value={socials.twitter_handle}
-              onChange={handleChange('twitter_handle')}
-              onBlur={handleBlur('twitter_handle')}
-              placeholder="yourhandle"
-              className="input-field"
-              disabled={submitting}
-              maxLength={50}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="ig_handle" className="form-label">
-              Instagram Handle
-            </label>
-            <input
-              type="text"
-              id="ig_handle"
-              value={socials.ig_handle}
-              onChange={handleChange('ig_handle')}
-              onBlur={handleBlur('ig_handle')}
-              placeholder="yourhandle"
-              className="input-field"
-              disabled={submitting}
-              maxLength={50}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="website" className="form-label">
-              Website
-            </label>
-            <input
-              type="text"
-              id="website"
-              value={socials.website}
-              onChange={handleChange('website')}
-              onBlur={handleBlur('website')}
-              placeholder="https://antiresume.com"
-              className="input-field"
-              disabled={submitting}
-            />
-          </div>
-
-          {error && (
-            <div className="alert alert-error">
-              {error}
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="linkedin">LinkedIn</Label>
+              <Input
+                id="linkedin"
+                value={socials.linkedin}
+                onChange={handleChange('linkedin')}
+                onBlur={handleBlur('linkedin')}
+                placeholder="https://linkedin.com/in/yourprofile"
+                disabled={submitting}
+              />
             </div>
-          )}
 
-          {success && (
-            <div className="alert alert-success">
-              {success}
+            <div className="space-y-2">
+              <Label htmlFor="twitter_handle">Twitter Handle</Label>
+              <Input
+                id="twitter_handle"
+                value={socials.twitter_handle}
+                onChange={handleChange('twitter_handle')}
+                onBlur={handleBlur('twitter_handle')}
+                placeholder="yourhandle"
+                disabled={submitting}
+                maxLength={50}
+              />
             </div>
-          )}
 
-          <div className="flex justify-between items-center gap-3">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 btn-base btn-primary"
-            >
-              {submitting ? 'Saving…' : 'Save Social Links'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSocials({ ...defaultState })
-                setSuccess('')
-                setError('')
-              }}
-              disabled={submitting || !hasAnyValue}
-              className="btn-base btn-outline"
-            >
-              Clear
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
+            <div className="space-y-2">
+              <Label htmlFor="ig_handle">Instagram Handle</Label>
+              <Input
+                id="ig_handle"
+                value={socials.ig_handle}
+                onChange={handleChange('ig_handle')}
+                onBlur={handleBlur('ig_handle')}
+                placeholder="yourhandle"
+                disabled={submitting}
+                maxLength={50}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                value={socials.website}
+                onChange={handleChange('website')}
+                onBlur={handleBlur('website')}
+                placeholder="https://antiresume.com"
+                disabled={submitting}
+              />
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex items-center gap-3">
+              <Button type="submit" disabled={submitting} className="flex-1">
+                {submitting ? 'Saving…' : 'Save Social Links'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setSocials({ ...defaultState })
+                  setSuccess('')
+                  setError('')
+                }}
+                disabled={submitting || !hasAnyValue}
+              >
+                Clear
+              </Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   )
 }

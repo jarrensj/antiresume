@@ -1,7 +1,8 @@
 'use client'
 
 import { Tweet } from 'react-tweet'
-import { extractTweetId } from '@/app/lib/utils'
+import { detectPostPlatform, extractInstagramPost, extractTweetId } from '@/app/lib/utils'
+import InstagramEmbed from '@/components/InstagramEmbed'
 
 interface TweetItem {
   tweet_link: string
@@ -13,19 +14,26 @@ interface PublicTweetCardProps {
 }
 
 export default function PublicTweetCard({ tweetItem }: PublicTweetCardProps) {
-  const tweetId = extractTweetId(tweetItem.tweet_link)
+  const platform = detectPostPlatform(tweetItem.tweet_link)
 
-  if (!tweetId) {
+  if (platform === 'unknown') {
     return (
       <div
         className="public-tweet-card public-tweet-card--error"
         role="alert"
       >
-        <p className="public-tweet-card__error-title">Invalid tweet URL</p>
+        <p className="public-tweet-card__error-title">Unsupported post URL</p>
         <p className="public-tweet-card__error-body">{tweetItem.tweet_link}</p>
       </div>
     )
   }
+
+  const embed =
+    platform === 'twitter'
+      ? <Tweet id={extractTweetId(tweetItem.tweet_link)!} />
+      : <InstagramEmbed post={extractInstagramPost(tweetItem.tweet_link)!} />
+
+  const sourceLabel = platform === 'twitter' ? 'View on X ↗' : 'View on Instagram ↗'
 
   return (
     <article className="public-tweet-card">
@@ -37,7 +45,7 @@ export default function PublicTweetCard({ tweetItem }: PublicTweetCardProps) {
       )}
 
       <div className="public-tweet-card__embed">
-        <Tweet id={tweetId} />
+        {embed}
       </div>
 
       <footer className="public-tweet-card__footer">
@@ -47,7 +55,7 @@ export default function PublicTweetCard({ tweetItem }: PublicTweetCardProps) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          View on X ↗
+          {sourceLabel}
         </a>
       </footer>
     </article>

@@ -1,7 +1,8 @@
 'use client'
 
 import { Tweet } from 'react-tweet'
-import { extractTweetId } from '@/app/lib/utils'
+import { detectPostPlatform, extractInstagramPost, extractTweetId } from '@/app/lib/utils'
+import InstagramEmbed from '@/components/InstagramEmbed'
 
 interface TweetItem {
   tweet_link: string
@@ -15,14 +16,13 @@ interface TweetCardProps {
 }
 
 export default function TweetCard({ tweetItem, variant = 'default' }: TweetCardProps) {
-  const tweetId = extractTweetId(tweetItem.tweet_link)
-  
-  // Handle invalid tweet URL
-  if (!tweetId) {
+  const platform = detectPostPlatform(tweetItem.tweet_link)
+
+  if (platform === 'unknown') {
     if (variant === 'compact') {
       return (
         <div className="alert alert-error text-xs">
-          Invalid tweet URL
+          Unsupported post URL
         </div>
       )
     }
@@ -30,7 +30,7 @@ export default function TweetCard({ tweetItem, variant = 'default' }: TweetCardP
     return (
       <div className="alert alert-error">
         <p className="text-sm font-medium">
-          Invalid tweet URL: {tweetItem.tweet_link}
+          Unsupported post URL: {tweetItem.tweet_link}
         </p>
         {tweetItem.notes && (
           <p className="text-sm mt-3 text-secondary">
@@ -40,14 +40,20 @@ export default function TweetCard({ tweetItem, variant = 'default' }: TweetCardP
       </div>
     )
   }
-  
+
+  const embed =
+    platform === 'twitter'
+      ? <Tweet id={extractTweetId(tweetItem.tweet_link)!} />
+      : <InstagramEmbed post={extractInstagramPost(tweetItem.tweet_link)!} />
+
   if (variant === 'compact') {
-    return <Tweet id={tweetId} />
+    return embed
   }
+
+  const sourceLabel = platform === 'twitter' ? 'View on X ↗' : 'View on Instagram ↗'
 
   return (
     <article className="tweet-card">
-      {/* User's note (if exists) */}
       {tweetItem.notes && (
         <div className="tweet-note" aria-label="Note">
           <span className="tweet-note__label">Note</span>
@@ -55,9 +61,8 @@ export default function TweetCard({ tweetItem, variant = 'default' }: TweetCardP
         </div>
       )}
 
-      {/* Tweet embed */}
       <div className="tweet-embed">
-        <Tweet id={tweetId} />
+        {embed}
       </div>
 
       <div className="tweet-card__footer">
@@ -67,7 +72,7 @@ export default function TweetCard({ tweetItem, variant = 'default' }: TweetCardP
           target="_blank"
           rel="noopener noreferrer"
         >
-          View on X ↗
+          {sourceLabel}
         </a>
       </div>
     </article>

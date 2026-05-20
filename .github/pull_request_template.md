@@ -15,4 +15,4 @@
 ### Test Case 2 
 
 ## Deployment
-<!-- any migrations or env variables --> 
+<!-- any migrations or env variables, did you already run the migrations and set the env variables --> 

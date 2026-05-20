@@ -1,9 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ArrowDown, ArrowUp, GripVertical } from 'lucide-react'
 import { Tweet, Resume } from '@/app/lib/db'
 import TweetCard from '@/components/TweetCard'
 import { detectPostPlatform } from '@/app/lib/utils'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ResumeFormProps {
   onResumeUpdated?: () => void
@@ -226,12 +234,13 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
 
   if (fetchingResume) {
     return (
-      <div className="max-w-2xl mx-auto card p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto loading-spinner"></div>
-          <p className="mt-3 text-lg loading-text">Loading resume…</p>
-        </div>
-      </div>
+      <Card className="mx-auto max-w-2xl">
+        <CardContent className="space-y-4 pt-6">
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
     )
   }
 
@@ -244,190 +253,151 @@ export default function ResumeForm({ onResumeUpdated }: ResumeFormProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto card p-8">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-3 heading-handwritten">
-            {resume ? 'Edit Resume' : 'Create Resume'}
-          </h2>
-          <p className="text-secondary">
-            Add X/Twitter or Instagram post links to showcase your thoughts and insights
-          </p>
-        </div>
+    <Card className="mx-auto max-w-2xl">
+      <CardHeader className="items-center text-center">
+        <CardTitle className="text-3xl">
+          {resume ? 'Edit Resume' : 'Create Resume'}
+        </CardTitle>
+        <CardDescription>
+          Add X/Twitter or Instagram post links to showcase your thoughts and insights
+        </CardDescription>
         {resume && (
-          <button
-            onClick={handleDelete}
-            disabled={loading}
-            className="btn-base btn-danger"
-          >
-            Delete Resume
-          </button>
+          <div className="pt-2">
+            <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+              Delete Resume
+            </Button>
+          </div>
         )}
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {tweets.map((tweet, index) => (
-          <div 
-            key={`tweet-${index}`}
-            draggable={!loading && tweets.length > 1}
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
-            onDragEnd={handleDragEnd}
-            className={getDragClassName(index)}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                {tweets.length > 1 && !loading && (
-                  <div className="text-muted">
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M10 13a1 1 0 100-2 1 1 0 000 2zM10 8a1 1 0 100-2 1 1 0 000 2zM10 5a1 1 0 100-2 1 1 0 000 2zM6 13a1 1 0 100-2 1 1 0 000 2zM6 8a1 1 0 100-2 1 1 0 000 2zM6 5a1 1 0 100-2 1 1 0 000 2z"/>
-                    </svg>
-                  </div>
-                )}
-                <h3 className="text-xl font-medium heading-handwritten">
-                  Post #{index + 1}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {tweets.map((tweet, index) => (
+            <div
+              key={`tweet-${index}`}
+              draggable={!loading && tweets.length > 1}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={getDragClassName(index)}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {tweets.length > 1 && !loading && (
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <h3 className="text-xl font-medium">Post #{index + 1}</h3>
+                </div>
                 {tweets.length > 1 && (
-                  <>
-                    <button
+                  <div className="flex items-center gap-1">
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => moveTweetUp(index)}
                       disabled={loading || index === 0}
-                      className="btn-icon"
-                      title="Move up"
+                      aria-label="Move up"
                     >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 3.5l-4 4h8l-4-4z"/>
-                        <path d="M4 10h8v1H4v-1z"/>
-                      </svg>
-                    </button>
-                    <button
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => moveTweetDown(index)}
                       disabled={loading || index === tweets.length - 1}
-                      className="btn-icon"
-                      title="Move down"
+                      aria-label="Move down"
                     >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M4 5h8v1H4V5z"/>
-                        <path d="M8 12.5l4-4H4l4 4z"/>
-                      </svg>
-                    </button>
-                    <button
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => removeTweet(index)}
-                      className="btn-remove"
                       disabled={loading}
+                      className="text-destructive hover:text-destructive"
                     >
                       Remove
-                    </button>
-                  </>
+                    </Button>
+                  </div>
                 )}
               </div>
-            </div>
-            
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-              <div className="flex-1 min-w-0 space-y-4">
-                <div className="space-y-3">
-                  <label className="form-label">
-                    Post Link *
-                  </label>
-                  <input
-                    type="url"
-                    value={tweet.tweet_link}
-                    onChange={(e) => updateTweet(index, 'tweet_link', e.target.value)}
-                    placeholder="https://x.com/… or https://instagram.com/p/…"
-                    className="input-field"
-                    disabled={loading}
-                  />
+
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                <div className="min-w-0 flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`tweet-link-${index}`}>Post Link *</Label>
+                    <Input
+                      id={`tweet-link-${index}`}
+                      type="url"
+                      value={tweet.tweet_link}
+                      onChange={(e) => updateTweet(index, 'tweet_link', e.target.value)}
+                      placeholder="https://x.com/… or https://instagram.com/p/…"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`tweet-notes-${index}`}>Notes (optional)</Label>
+                    <Textarea
+                      id={`tweet-notes-${index}`}
+                      value={tweet.notes || ''}
+                      onChange={(e) => updateTweet(index, 'notes', e.target.value)}
+                      placeholder="Add your thoughts about this post…"
+                      rows={3}
+                      disabled={loading}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="form-label">
-                    Notes (optional)
-                  </label>
-                  <textarea
-                    value={tweet.notes || ''}
-                    onChange={(e) => updateTweet(index, 'notes', e.target.value)}
-                    placeholder="Add your thoughts about this post…"
-                    rows={3}
-                    className="textarea-field"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <div className="lg:w-72 flex flex-col gap-3">
-                <label className="form-label">
-                  Preview
-                </label>
-                {tweet.tweet_link.trim() ? (
-                  <div className="rounded-2xl border px-3 py-4" style={{
-                    borderColor: 'var(--border-gentle)',
-                    background: 'var(--background-secondary)',
-                    boxShadow: 'var(--shadow-gentle)'
-                  }}>
-                    <div className="tweet-preview-container">
-                      <TweetCard
-                        tweetItem={tweet}
-                        index={index}
-                        variant="compact"
-                      />
+                <div className="flex flex-col gap-2 lg:w-72">
+                  <Label>Preview</Label>
+                  {tweet.tweet_link.trim() ? (
+                    <div className="rounded-lg border border-border bg-secondary p-3">
+                      <TweetCard tweetItem={tweet} index={index} variant="compact" />
                     </div>
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed px-4 py-6 text-sm text-center" style={{
-                    borderColor: 'var(--border-gentle)',
-                    background: 'var(--background-card)',
-                    color: 'var(--foreground-secondary)'
-                  }}>
-                    Add a post link to see the preview
-                  </div>
-                )}
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
+                      Add a post link to see the preview
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+          ))}
+
+          <div className="flex items-center justify-between gap-4">
+            <Button type="button" variant="secondary" onClick={addTweet} disabled={loading}>
+              Add Another Post
+            </Button>
+
+            <Button type="submit" disabled={loading} className="px-8">
+              {loading
+                ? resume
+                  ? 'Updating…'
+                  : 'Creating…'
+                : resume
+                  ? 'Update Resume'
+                  : 'Create Resume'}
+            </Button>
           </div>
-        ))}
 
-        <div className="flex justify-between items-center gap-4">
-          <button
-            type="button"
-            onClick={addTweet}
-            className="btn-base btn-secondary"
-            disabled={loading}
-          >
-            Add Another Post
-          </button>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-base btn-primary px-8"
-          >
-            {loading 
-              ? (resume ? 'Updating…' : 'Creating…') 
-              : (resume ? 'Update Resume' : 'Create Resume')
-            }
-          </button>
-        </div>
-
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="alert alert-success">
-            {success}
-          </div>
-        )}
-      </form>
-    </div>
+          {success && (
+            <Alert>
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+        </form>
+      </CardContent>
+    </Card>
   )
 }
 

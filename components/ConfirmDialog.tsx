@@ -1,5 +1,19 @@
 'use client'
 
+import { AlertCircle, AlertTriangle, Info } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
 interface ConfirmDialogProps {
   isOpen: boolean
   title: string
@@ -21,114 +35,57 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
   isLoading = false,
-  variant = 'warning'
+  variant = 'warning',
 }: ConfirmDialogProps) {
-  if (!isOpen) return null
-
-  const getButtonClass = () => {
-    switch (variant) {
-      case 'danger':
-        return 'btn-danger'
-      case 'warning':
-        return 'btn-secondary'
-      case 'info':
-        return 'btn-primary'
-      default:
-        return 'btn-primary'
-    }
-  }
-
-  const getIconColor = () => {
-    switch (variant) {
-      case 'danger':
-        return '#dc3545'
-      case 'warning':
-        return '#ff9800'
-      case 'info':
-        return 'var(--accent-green)'
-      default:
-        return 'var(--accent-green)'
-    }
-  }
-
-  const iconColor = getIconColor()
+  const Icon = variant === 'danger' ? AlertCircle : variant === 'info' ? Info : AlertTriangle
+  const iconClasses =
+    variant === 'danger'
+      ? 'text-destructive bg-destructive/10'
+      : variant === 'info'
+        ? 'text-primary bg-primary/10'
+        : 'text-amber-600 bg-amber-500/10'
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.5)' }}
-      onClick={onCancel}
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoading) onCancel()
+      }}
     >
-      <div 
-        className="max-w-md w-full rounded-2xl p-6 shadow-2xl"
-        style={{ background: 'var(--background-card)' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start gap-4 mb-5">
-          <div 
-            className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: `${iconColor}20` }}
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={iconColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-start gap-4">
+            <div
+              className={cn(
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-full',
+                iconClasses,
+              )}
             >
-              {variant === 'danger' && (
-                <>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </>
-              )}
-              {variant === 'warning' && (
-                <>
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </>
-              )}
-              {variant === 'info' && (
-                <>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </>
-              )}
-            </svg>
+              <Icon className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <AlertDialogTitle>{title}</AlertDialogTitle>
+              <AlertDialogDescription>{message}</AlertDialogDescription>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-2xl font-bold mb-2 heading-handwritten">
-              {title}
-            </h3>
-            <p className="text-base leading-relaxed text-secondary">
-              {message}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            disabled={isLoading}
-            className="btn-base btn-outline"
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className={`btn-base ${getButtonClass()}`}
-          >
-            {isLoading ? 'Processing…' : confirmText}
-          </button>
-        </div>
-      </div>
-    </div>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel asChild>
+            <Button variant="outline" onClick={onCancel} disabled={isLoading}>
+              {cancelText}
+            </Button>
+          </AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button
+              variant={variant === 'danger' ? 'destructive' : 'default'}
+              onClick={onConfirm}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Processing…' : confirmText}
+            </Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

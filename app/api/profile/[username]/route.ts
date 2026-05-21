@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClerkSupabaseClient } from "@/app/lib/db"
+import { publicUrlForKey } from "@/app/lib/s3"
 
 export async function GET(
   _request: NextRequest,
@@ -39,12 +40,29 @@ export async function GET(
       .eq('user_profile_id', profile.id)
       .single()
 
-    return NextResponse.json({ 
+    // Get user's public photo gallery
+    const { data: photoRows } = await supabase
+      .from('photos')
+      .select('id, s3_key, caption, width, height, display_order, created_at')
+      .eq('user_profile_id', profile.id)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: true })
+
+    const photos = (photoRows ?? []).map((row) => ({
+      id: row.id,
+      url: publicUrlForKey(row.s3_key),
+      caption: row.caption,
+      width: row.width,
+      height: row.height,
+    }))
+
+    return NextResponse.json({
       profile: {
         ...profile,
         tweets: resume?.tweets || [],
-        resume_created_at: resume?.created_at
-      }
+        resume_created_at: resume?.created_at,
+        photos,
+      },
     })
 
   } catch (error) {

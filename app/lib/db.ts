@@ -41,3 +41,17 @@ export interface Resume {
   created_at: string
   updated_at: string
 }
+
+export interface Photo {
+  id: string
+  user_profile_id: string
+  s3_key: string
+  caption: string | null
+  mime_type: string | null
+  size_bytes: number | null
+  width: number | null
+  height: number | null
+  display_order: number
+  created_at: string
+  updated_at: string
+}

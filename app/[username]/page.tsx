@@ -10,6 +10,14 @@ interface TweetItem {
   notes?: string
 }
 
+interface PublicPhoto {
+  id: string
+  url: string
+  caption: string | null
+  width?: number | null
+  height?: number | null
+}
+
 interface UserProfile {
   id: string
   username: string
@@ -22,6 +30,7 @@ interface UserProfile {
   website?: string | null
   evm_wallet_address?: string | null
   solana_wallet_address?: string | null
+  photos?: PublicPhoto[]
 }
 
 interface ProfilePageProps {
@@ -225,6 +234,34 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             </div>
           )}
         </div>
+
+        {/* Photo Gallery */}
+        {profile.photos && profile.photos.length > 0 && (
+          <section className="mb-10">
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {profile.photos.map((photo) => (
+                <li
+                  key={photo.id}
+                  className="overflow-hidden rounded-lg border"
+                  style={{ borderColor: 'var(--border-gentle)' }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.url}
+                    alt={photo.caption ?? `Photo by ${profile.username}`}
+                    loading="lazy"
+                    className="block w-full aspect-square object-cover"
+                  />
+                  {photo.caption && (
+                    <p className="px-2 py-1 text-xs text-secondary truncate" title={photo.caption}>
+                      {photo.caption}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Tweets Section */}
         <div className="space-y-6">

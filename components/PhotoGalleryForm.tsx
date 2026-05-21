@@ -1,6 +1,7 @@
 'use client'
 
 import { ChangeEvent, ClipboardEvent, DragEvent, useEffect, useRef, useState } from 'react'
+import PhotoCropper from '@/components/PhotoCropper'
 
 interface PhotoItem {
   id: string
@@ -27,6 +28,7 @@ export default function PhotoGalleryForm() {
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isCropping, setIsCropping] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const dragCounter = useRef(0)
 
@@ -74,6 +76,7 @@ export default function PhotoGalleryForm() {
     setError('')
     setSuccess('')
     setPendingFile(file)
+    setIsCropping(false)
   }
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +85,13 @@ export default function PhotoGalleryForm() {
 
   const clearPending = () => {
     setPendingFile(null)
+    setIsCropping(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCropApply = (cropped: File) => {
+    setPendingFile(cropped)
+    setIsCropping(false)
   }
 
   const handleUpload = async () => {
@@ -232,6 +241,17 @@ export default function PhotoGalleryForm() {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
+                  setIsCropping(true)
+                }}
+                className="btn-base btn-outline text-sm"
+                disabled={uploading}
+              >
+                Crop
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
                   clearPending()
                 }}
                 className="btn-base btn-outline text-sm"
@@ -260,6 +280,19 @@ export default function PhotoGalleryForm() {
             className="sr-only"
           />
         </div>
+
+        {isCropping && pendingFile && (
+          <div
+            className="rounded-2xl border p-4"
+            style={{ borderColor: 'var(--border-gentle)', background: 'var(--background-card)' }}
+          >
+            <PhotoCropper
+              file={pendingFile}
+              onApply={handleCropApply}
+              onCancel={() => setIsCropping(false)}
+            />
+          </div>
+        )}
 
         <div>
           <label className="form-label" htmlFor="photo-caption">Caption (optional)</label>

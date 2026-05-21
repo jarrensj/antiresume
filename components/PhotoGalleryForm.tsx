@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ClipboardEvent, DragEvent, useEffect, useRef, useState } from 'react'
 
 interface PhotoItem {
   id: string
@@ -15,6 +15,7 @@ interface PhotoItem {
 }
 
 const MAX_BYTES = 5 * 1024 * 1024
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 export default function PhotoGalleryForm() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
@@ -23,12 +24,26 @@ export default function PhotoGalleryForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [caption, setCaption] = useState('')
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const dragCounter = useRef(0)
 
   useEffect(() => {
     fetchPhotos()
   }, [])
+
+  // Object URLs for the preview thumbnail — revoke when the file changes
+  useEffect(() => {
+    if (!pendingFile) {
+      setPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(pendingFile)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [pendingFile])
 
   const fetchPhotos = async () => {
     setLoading(true)
@@ -45,23 +60,29 @@ export default function PhotoGalleryForm() {
     }
   }
 
-  const handleFileSelect = (file: File | null) => {
-    if (!file) {
-      setPendingFile(null)
-      return
-    }
+  /** Validates and accepts a candidate file from any input source (picker, drop, paste). */
+  const acceptFile = (file: File | null) => {
+    if (!file) return
     if (file.size > MAX_BYTES) {
       setError(`File too large — max ${MAX_BYTES / 1024 / 1024} MB`)
-      setPendingFile(null)
       return
     }
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
       setError('Only JPEG, PNG, WEBP, or GIF are allowed')
-      setPendingFile(null)
       return
     }
     setError('')
+    setSuccess('')
     setPendingFile(file)
+  }
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    acceptFile(event.target.files?.[0] ?? null)
+  }
+
+  const clearPending = () => {
+    setPendingFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleUpload = async () => {
@@ -78,9 +99,8 @@ export default function PhotoGalleryForm() {
       if (!res.ok) throw new Error(data.error || 'Upload failed')
       setPhotos((prev) => [...prev, data.photo])
       setSuccess('Photo uploaded')
-      setPendingFile(null)
       setCaption('')
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      clearPending()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -105,8 +125,69 @@ export default function PhotoGalleryForm() {
     }
   }
 
+  // ---- Drag-and-drop ----
+  // dragCounter handles nested enter/leave events firing when the cursor
+  // crosses child elements inside the dropzone.
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.dataTransfer.types.includes('Files')) {
+      dragCounter.current += 1
+      setIsDragging(true)
+    }
+  }
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.dataTransfer.types.includes('Files')) {
+      event.dataTransfer.dropEffect = 'copy'
+    }
+  }
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dragCounter.current = Math.max(0, dragCounter.current - 1)
+    if (dragCounter.current === 0) setIsDragging(false)
+  }
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dragCounter.current = 0
+    setIsDragging(false)
+    const file = event.dataTransfer.files?.[0]
+    if (file) acceptFile(file)
+  }
+
+  // ---- Paste ----
+  // Catches clipboard images (e.g., a Cmd+Shift+4 screenshot, or an image
+  // copied from another app) when the user pastes anywhere inside the form.
+  const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+    for (const item of items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile()
+        if (file) {
+          event.preventDefault()
+          acceptFile(file)
+          return
+        }
+      }
+    }
+  }
+
   return (
-    <div className="max-w-2xl mx-auto card p-8">
+    <div
+      className="max-w-2xl mx-auto card p-8"
+      onPaste={handlePaste}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-3 heading-handwritten">Photo Gallery</h2>
         <p className="text-secondary">
@@ -115,20 +196,69 @@ export default function PhotoGalleryForm() {
       </div>
 
       <div className="space-y-4 mb-8">
-        <div>
-          <label className="form-label" htmlFor="photo-file">Image</label>
+        <div
+          className="rounded-2xl border-2 border-dashed transition-colors text-center cursor-pointer focus-within:ring-2"
+          style={{
+            borderColor: isDragging ? 'var(--accent-green)' : 'var(--border-gentle)',
+            background: isDragging ? 'var(--sage-100)' : 'var(--background-card)',
+            padding: pendingFile ? '1rem' : '2rem',
+          }}
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              fileInputRef.current?.click()
+            }
+          }}
+          aria-label="Choose, drop, or paste an image"
+        >
+          {pendingFile && previewUrl ? (
+            <div className="flex items-center gap-4 text-left">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="Selected preview"
+                className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">{pendingFile.name}</p>
+                <p className="text-xs text-secondary">
+                  {(pendingFile.size / 1024).toFixed(0)} KB — {pendingFile.type}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  clearPending()
+                }}
+                className="btn-base btn-outline text-sm"
+                disabled={uploading}
+              >
+                Replace
+              </button>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm font-medium mb-1">
+                Drop, paste, or click to choose an image
+              </p>
+              <p className="text-xs text-secondary">
+                JPEG, PNG, WEBP, or GIF — up to {MAX_BYTES / 1024 / 1024} MB
+              </p>
+            </>
+          )}
           <input
             ref={fileInputRef}
             id="photo-file"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+            accept={ALLOWED_TYPES.join(',')}
+            onChange={handleFileChange}
             disabled={uploading}
-            className="block w-full text-sm"
+            className="sr-only"
           />
-          <p className="mt-1 text-xs text-secondary">
-            JPEG, PNG, WEBP, or GIF — up to {MAX_BYTES / 1024 / 1024} MB
-          </p>
         </div>
 
         <div>
@@ -167,7 +297,7 @@ export default function PhotoGalleryForm() {
           <p className="text-secondary text-sm">Loading…</p>
         ) : photos.length === 0 ? (
           <p className="text-secondary text-sm">
-            No photos yet. Upload your first one above.
+            No photos yet. Drop or paste your first one above.
           </p>
         ) : (
           <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">

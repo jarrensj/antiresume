@@ -31,6 +31,7 @@ export default function Home() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isNewSignup, setIsNewSignup] = useState(false)
 
   const closeSidebar = () => setSidebarOpen(false)
 
@@ -81,6 +82,10 @@ export default function Home() {
   }, [])
 
   const handleUsernameSet = (username: string) => {
+    // First-time signups (no prior profile) get a welcome message instead of "welcome back"
+    if (!userProfile) {
+      setIsNewSignup(true)
+    }
     // Refresh the profile data
     setUserProfile(prev => prev ? { ...prev, username } : null)
     setShowUpdateForm(false)
@@ -471,10 +476,10 @@ export default function Home() {
               <>
                 <div className="mb-10">
                   <h1 className="text-5xl font-bold mb-3 heading-handwritten">
-                    Welcome back, {userProfile.username}!
+                    {isNewSignup ? `Welcome, ${userProfile.username}!` : `Welcome back, ${userProfile.username}!`}
                   </h1>
                   <p className="text-lg text-secondary">
-                    Edit your profile
+                    {isNewSignup ? 'Your profile is ready — start building it out' : 'Edit your profile'}
                   </p>
                 </div>
 

@@ -44,11 +44,11 @@ export const normalizeInstagramHandle = (raw: string): string => {
 
 /**
  * Accepts any of:
- *   - `jarrensj`                      → https://linkedin.com/in/jarrensj
- *   - `in/jarrensj`                   → https://linkedin.com/in/jarrensj
- *   - `linkedin.com/in/jarrensj`      → https://linkedin.com/in/jarrensj
- *   - `https://linkedin.com/in/foo`   → unchanged
- *   - `linkedin.com/company/acme`     → https://linkedin.com/company/acme (other path segments preserved)
+ *   - `jarrensanjose`                            → https://linkedin.com/in/jarrensanjose
+ *   - `in/jarrensanjose`                         → https://linkedin.com/in/jarrensanjose
+ *   - `linkedin.com/in/jarrensanjose`            → https://linkedin.com/in/jarrensanjose
+ *   - `https://linkedin.com/in/jarrensanjose`    → unchanged
+ *   - `linkedin.com/company/jarrensanjose`       → https://linkedin.com/company/jarrensanjose (other path segments preserved)
  */
 export const normalizeLinkedInUrl = (raw: string): string => {
   const trimmed = raw.trim()

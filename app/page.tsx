@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs'
+import { Show, SignInButton } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import UsernameForm from '@/components/UsernameForm'
 import ResumeForm from '@/components/ResumeForm'
@@ -130,7 +130,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <SignedOut>
+      <Show when="signed-out">
         {/* Hero Section */}
         <section className="py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
@@ -431,9 +431,9 @@ export default function Home() {
             </div>
           </div>
         </footer>
-      </SignedOut>
+      </Show>
 
-      <SignedIn>
+      <Show when="signed-in">
         {/* Hamburger Menu Button */}
         {userProfile && (
           <button
@@ -564,7 +564,7 @@ export default function Home() {
           </div>
         )}
         </div>
-      </SignedIn>
+      </Show>
 
       {/* Reset Profile Confirmation Dialog */}
       <ConfirmDialog

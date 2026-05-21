@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import { User, Edit3, FileType, Share2, Wallet, Trash2 } from 'lucide-react'
+import { User, Edit3, FileType, Share2, Wallet, ImageIcon, Trash2 } from 'lucide-react'
 
 type IconType = ComponentType<{ className?: string }>
 
@@ -17,6 +17,7 @@ interface DashboardSidebarProps {
   onResumeClick: () => void
   onSocialLinksClick: () => void
   onWalletsClick: () => void
+  onPhotosClick: () => void
   onResetClick: () => void
 }
 
@@ -27,12 +28,14 @@ export default function DashboardSidebar({
   onResumeClick,
   onSocialLinksClick,
   onWalletsClick,
+  onPhotosClick,
   onResetClick,
 }: DashboardSidebarProps) {
   const navItems: NavItem[] = [
     { label: 'Profile', icon: User, onClick: onProfileClick },
     { label: 'Username', icon: Edit3, onClick: onUsernameClick },
     { label: 'Resume', icon: FileType, onClick: onResumeClick },
+    { label: 'Photo Gallery', icon: ImageIcon, onClick: onPhotosClick },
     { label: 'Social Links', icon: Share2, onClick: onSocialLinksClick },
     { label: 'Wallets', icon: Wallet, onClick: onWalletsClick },
   ]

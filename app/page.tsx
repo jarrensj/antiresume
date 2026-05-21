@@ -8,6 +8,7 @@ import ResumeForm from '@/components/ResumeForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
+import PhotoGalleryForm from '@/components/PhotoGalleryForm'
 import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
 
@@ -27,6 +28,7 @@ export default function Home() {
   const [showResumeForm, setShowResumeForm] = useState(false)
   const [showSocialForm, setShowSocialForm] = useState(false)
   const [showWalletForm, setShowWalletForm] = useState(false)
+  const [showPhotosForm, setShowPhotosForm] = useState(false)
   const [showResetDialog, setShowResetDialog] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
@@ -34,13 +36,14 @@ export default function Home() {
 
   const closeSidebar = () => setSidebarOpen(false)
 
-  type SidebarSection = 'profile' | 'username' | 'resume' | 'social' | 'wallet'
+  type SidebarSection = 'profile' | 'username' | 'resume' | 'social' | 'wallet' | 'photos'
 
   const getActiveSection = (): SidebarSection => {
     if (showUpdateForm) return 'username'
     if (showResumeForm) return 'resume'
     if (showSocialForm) return 'social'
     if (showWalletForm) return 'wallet'
+    if (showPhotosForm) return 'photos'
     return 'profile'
   }
 
@@ -52,6 +55,7 @@ export default function Home() {
     setShowResumeForm(nextSection === 'resume')
     setShowSocialForm(nextSection === 'social')
     setShowWalletForm(nextSection === 'wallet')
+    setShowPhotosForm(nextSection === 'photos')
     closeSidebar()
   }
 
@@ -120,6 +124,7 @@ export default function Home() {
       setShowResumeForm(false)
       setShowSocialForm(false)
       setShowWalletForm(false)
+      setShowPhotosForm(false)
       
     } catch (err) {
       setResetError(err instanceof Error ? err.message : 'An error occurred')
@@ -452,6 +457,7 @@ export default function Home() {
             onResumeClick={() => handleSectionNav('resume')}
             onSocialLinksClick={() => handleSectionNav('social')}
             onWalletsClick={() => handleSectionNav('wallet')}
+            onPhotosClick={() => handleSectionNav('photos')}
             onResetClick={handleResetNav}
           />
 
@@ -466,7 +472,7 @@ export default function Home() {
         ) : userProfile ? (
           // User has a profile - show dashboard or forms
           <div className="text-center max-w-3xl mx-auto w-full">
-            {!showUpdateForm && !showResumeForm && !showSocialForm && !showWalletForm ? (
+            {!showUpdateForm && !showResumeForm && !showSocialForm && !showWalletForm && !showPhotosForm ? (
               // Show profile dashboard when no form is active
               <>
                 <div className="mb-10">
@@ -546,6 +552,12 @@ export default function Home() {
                 {showWalletForm && (
                   <div className="mb-8">
                     <WalletAddressesForm />
+                  </div>
+                )}
+
+                {showPhotosForm && (
+                  <div className="mb-8">
+                    <PhotoGalleryForm />
                   </div>
                 )}
               </>

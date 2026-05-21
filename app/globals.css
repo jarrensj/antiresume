@@ -1,15 +1,17 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* Warm cream background */
-  --background: #faf7f2;
   --background-secondary: #f5f1ea;
   --background-card: #fefcf8;
   --matcha-cream: #faf7f2;
   --matcha-light: #f5f1ea;
-  
+
   /* Gentle charcoal gray text */
-  --foreground: #4a4a4a;
   --foreground-secondary: #6b6b6b;
   --foreground-light: #8a8a8a;
   --charcoal-800: #444444;
@@ -19,7 +21,7 @@
   --charcoal-400: #a0a0a0;
   --charcoal-300: #c0c0c0;
   --charcoal-200: #e0e0e0;
-  
+
   /* Soft accent colors */
   --accent-green: #7a9b7e;
   --accent-brown: #a68b5b;
@@ -31,88 +33,79 @@
   --sage-200: #d4e1d6;
   --sage-100: #e8f0ea;
   --matcha-100: #d9e5d3;
-  
+
   /* Borders and dividers */
   --border-soft: #e8e0d6;
   --border-gentle: #ddd4c7;
-  
+
   /* Interactive states */
   --hover-bg: #f0ebe2;
   --focus-ring: #9db5a1;
-  
+
   /* Shadows - very subtle */
   --shadow-soft: 0 2px 8px rgba(74, 74, 74, 0.08);
   --shadow-gentle: 0 1px 4px rgba(74, 74, 74, 0.06);
-  
-  /* Font variables */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-handwritten: var(--font-geist-mono);
-  --font-noto: 'Noto Sans JP', var(--font-geist-sans), system-ui, sans-serif;
-  --font-zen: 'Zen Kaku Gothic New', var(--font-geist-sans), system-ui, sans-serif;
+
+  /* Font variables — literal Geist names so @theme inline can resolve at parse time.
+     The next/font className on <html> provides the actual web font; these declare
+     the family stack the rest of the stylesheet uses. */
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-handwritten: var(--font-mono);
+  --font-noto: 'Noto Sans JP', var(--font-sans);
+  --font-zen: 'Zen Kaku Gothic New', var(--font-sans);
+
+  /* shadcn tokens mapped to the antiresume brand palette */
+  --background: #faf7f2;       /* matcha cream */
+  --foreground: #4a4a4a;       /* charcoal */
+  --card: #fefcf8;             /* background-card */
+  --card-foreground: #4a4a4a;
+  --popover: #fefcf8;
+  --popover-foreground: #4a4a4a;
+  --primary: #7a9b7e;          /* accent-green */
+  --primary-foreground: #faf7f2;
+  --secondary: #f5f1ea;        /* background-secondary */
+  --secondary-foreground: #4a4a4a;
+  --muted: #f5f1ea;
+  --muted-foreground: #6b6b6b; /* foreground-secondary */
+  --accent: #e8f0ea;           /* sage-100 */
+  --accent-foreground: #4a4a4a;
+  --destructive: #b94545;
+  --border: #ddd4c7;           /* border-gentle */
+  --input: #ddd4c7;
+  --ring: #9db5a1;             /* accent-sage */
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Remove dark mode for consistent warm aesthetic */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.6;
   letter-spacing: 0.01em;
 }
 
-/* Global styling improvements */
 * {
   box-sizing: border-box;
 }
 
-/* Smooth focus outlines */
-*:focus {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
+/* shadcn primitives handle their own focus/hover/border treatment.
+   Legacy elements (the signed-out marketing page, embed cards) opt into
+   the brand styles via the .legacy-* classes below. */
 
-/* Button base styles */
-button, .btn {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  border: 1.5px solid transparent;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
-}
-
-button:hover, .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-soft);
-}
-
-/* Input and form styling */
-input, textarea, select {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  border: 1.5px solid var(--border-gentle);
-  border-radius: 10px;
-  transition: all 0.2s ease;
-  background: var(--background-card);
-}
-
-input:hover, textarea:hover, select:hover {
-  border-color: var(--accent-sage);
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: var(--accent-green);
-  background: var(--background);
-  box-shadow: 0 0 0 3px rgba(157, 181, 161, 0.15);
-}
-
-/* Card styling */
-.card {
+.legacy-card {
   background: var(--background-card);
   border: 1.5px solid var(--border-soft);
   border-radius: 16px;
@@ -120,9 +113,17 @@ input:focus, textarea:focus, select:focus {
   transition: all 0.2s ease;
 }
 
-.card:hover {
+.legacy-card:hover {
   border-color: var(--border-gentle);
   box-shadow: var(--shadow-soft);
+}
+
+/* Back-compat alias — older components still reference `.card` */
+.card {
+  background: var(--background-card);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow: var(--shadow-gentle);
 }
 
 /* Tweet Card Component */
@@ -820,4 +821,93 @@ h4 { font-size: 1.5rem; }
   border-radius: inherit;
   opacity: 0.6;
   transform: rotate(-0.5deg);
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }

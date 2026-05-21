@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface UsernameFormProps {
   onUsernameSet?: (username: string) => void
@@ -9,7 +14,11 @@ interface UsernameFormProps {
   currentUsername?: string
 }
 
-export default function UsernameForm({ onUsernameSet, mode = 'create', currentUsername = '' }: UsernameFormProps) {
+export default function UsernameForm({
+  onUsernameSet,
+  mode = 'create',
+  currentUsername = '',
+}: UsernameFormProps) {
   const [username, setUsername] = useState(currentUsername)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,7 +30,6 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
   }, [currentUsername, mode])
 
   const handleBlur = () => {
-    // Remove @ symbol from username if present
     if (username.trim().startsWith('@')) {
       setUsername(username.trim().slice(1))
     }
@@ -29,7 +37,7 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!username.trim()) {
       setError('Username is required')
       return
@@ -48,27 +56,22 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
       const method = mode === 'update' ? 'PUT' : 'POST'
       const response = await fetch('/api/username', {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          username: username.trim()
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim() }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to ${mode === 'update' ? 'update' : 'save'} username`)
+        throw new Error(
+          data.error || `Failed to ${mode === 'update' ? 'update' : 'save'} username`,
+        )
       }
 
-      // Success!
-      const successMessage = mode === 'update' ? 'Username updated successfully!' : 'Username saved successfully!'
-      setSuccess(successMessage)
-      
-      // Call the callback if provided
+      setSuccess(
+        mode === 'update' ? 'Username updated successfully!' : 'Username saved successfully!',
+      )
       onUsernameSet?.(username.trim())
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -76,58 +79,58 @@ export default function UsernameForm({ onUsernameSet, mode = 'create', currentUs
     }
   }
 
+  const submitDisabled =
+    loading || !username.trim() || (mode === 'update' && username.trim() === currentUsername)
+
   return (
-    <div className="max-w-md mx-auto card p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-3 heading-handwritten">
+    <Card className="mx-auto max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle className="text-3xl">
           {mode === 'update' ? 'Update Username' : `Welcome${user?.firstName ? `, ${user.firstName}` : ''}!`}
-        </h2>
-        <p className="text-secondary">
+        </CardTitle>
+        <CardDescription>
           {mode === 'update' ? 'Change your username below' : 'Choose a username to complete your profile'}
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="username" className="form-label">
-            Username *
-          </label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onBlur={handleBlur}
-            placeholder="username"
-            className="input-field"
-            disabled={loading}
-            maxLength={50}
-          />
-        </div>
-
-        {error && (
-          <div className="alert alert-error">
-            {error}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="username">Username *</Label>
+            <Input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onBlur={handleBlur}
+              placeholder="username"
+              disabled={loading}
+              maxLength={50}
+            />
           </div>
-        )}
 
-        {success && (
-          <div className="alert alert-success">
-            {success}
-          </div>
-        )}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <button
-          type="submit"
-          disabled={loading || !username.trim() || (mode === 'update' && username.trim() === currentUsername)}
-          className="w-full btn-base btn-primary"
-        >
-          {loading 
-            ? (mode === 'update' ? 'Updating…' : 'Saving…') 
-            : (mode === 'update' ? 'Update Username' : 'Save Username')
-          }
-        </button>
-      </form>
-    </div>
+          {success && (
+            <Alert>
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+
+          <Button type="submit" disabled={submitDisabled} className="w-full">
+            {loading
+              ? mode === 'update'
+                ? 'Updating…'
+                : 'Saving…'
+              : mode === 'update'
+                ? 'Update Username'
+                : 'Save Username'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

@@ -8,7 +8,7 @@ import ResumeForm from '@/components/ResumeForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
-import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon, AlertTriangle } from 'lucide-react'
+import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
 import OfflineDialog, { PROJECT_OFFLINE } from '@/components/OfflineDialog'
 
@@ -137,36 +137,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--background)' }}>
-      {PROJECT_OFFLINE && (
-        <div className="border-b-2 border-amber-300 bg-amber-100/80 px-6 py-3">
-          <div className="max-w-4xl mx-auto flex items-start gap-3 text-sm text-charcoal-800">
-            <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600" strokeWidth={1.75} aria-hidden="true" />
-            <p className="leading-relaxed">
-              <span className="font-medium">antiresume is temporarily offline.</span>{' '}
-              The database is down and the project is paused while we work on it. Follow{' '}
-              <a
-                href="https://x.com/antiresume"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:text-sage-500"
-              >
-                @antiresume on X
-              </a>{' '}
-              or{' '}
-              <a
-                href="https://instagram.com/antiresume"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:text-sage-500"
-              >
-                Instagram
-              </a>{' '}
-              for alerts when it&apos;s live again.
-            </p>
-          </div>
-        </div>
-      )}
-
       <Show when="signed-out">
         {/* Hero Section */}
         <section className="py-20 px-6">

@@ -52,10 +52,10 @@ export default function OfflineDialog({ open, onClose }: OfflineDialogProps) {
         </button>
 
         <h2 id="offline-dialog-title" className="text-base font-noto font-medium text-charcoal-800 mb-1">
-          coming back soon
+          project is offline
         </h2>
         <p className="text-xs text-charcoal-600 leading-relaxed mb-4">
-          follow for an alert when antiresume is live again
+          follow our socials to know when we&apos;re back
         </p>
 
         <div className="flex items-center justify-center gap-5">

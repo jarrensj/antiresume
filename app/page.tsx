@@ -10,6 +10,7 @@ import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
 import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
+import OfflineDialog, { PROJECT_OFFLINE } from '@/components/OfflineDialog'
 
 interface UserProfile {
   id: string
@@ -31,6 +32,12 @@ export default function Home() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showOfflineDialog, setShowOfflineDialog] = useState(false)
+
+  const openOfflineDialog = (event?: React.MouseEvent) => {
+    event?.preventDefault()
+    setShowOfflineDialog(true)
+  }
 
   const closeSidebar = () => setSidebarOpen(false)
 
@@ -153,11 +160,21 @@ export default function Home() {
 
             {/* CTA Button */}
             <div className="mb-16">
-              <SignInButton>
-                <button className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+              {PROJECT_OFFLINE ? (
+                <button
+                  type="button"
+                  onClick={openOfflineDialog}
+                  className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
                   Show your antiresume
                 </button>
-              </SignInButton>
+              ) : (
+                <SignInButton>
+                  <button className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    Show your antiresume
+                  </button>
+                </SignInButton>
+              )}
             </div>
 
             {/* Subtle decorative line */}
@@ -360,6 +377,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -368,6 +386,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -376,6 +395,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -565,6 +585,8 @@ export default function Home() {
         )}
         </div>
       </Show>
+
+      <OfflineDialog open={showOfflineDialog} onClose={() => setShowOfflineDialog(false)} />
 
       {/* Reset Profile Confirmation Dialog */}
       <ConfirmDialog

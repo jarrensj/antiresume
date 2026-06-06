@@ -1,12 +1,30 @@
 'use client'
 
-import { AlertTriangle, ExternalLink, X as CloseIcon } from 'lucide-react'
+import { X as CloseIcon } from 'lucide-react'
 
 export const PROJECT_OFFLINE = true
 
 interface OfflineDialogProps {
   open: boolean
   onClose: () => void
+}
+
+function XLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M18.244 2H21.5l-7.51 8.582L23 22h-6.852l-5.36-7.024L4.6 22H1.34l8.04-9.187L1 2h7.02l4.84 6.4L18.244 2Zm-1.2 18h1.84L7.04 4H5.087l11.957 16Z" />
+    </svg>
+  )
+}
+
+function InstagramLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  )
 }
 
 export default function OfflineDialog({ open, onClose }: OfflineDialogProps) {
@@ -21,50 +39,43 @@ export default function OfflineDialog({ open, onClose }: OfflineDialogProps) {
       aria-labelledby="offline-dialog-title"
     >
       <div
-        className="relative w-full max-w-md bg-matcha-cream rounded-2xl shadow-xl border-2 border-sage-300 p-6"
+        className="relative w-full max-w-xs bg-matcha-cream rounded-2xl shadow-xl border-2 border-sage-300 p-5 text-center"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 p-1 rounded-md text-charcoal-500 hover:text-charcoal-800 hover:bg-sage-100 transition-colors"
+          className="absolute top-2 right-2 p-1 rounded-md text-charcoal-500 hover:text-charcoal-800 hover:bg-sage-100 transition-colors"
           aria-label="Close"
         >
-          <CloseIcon className="w-5 h-5" />
+          <CloseIcon className="w-4 h-4" />
         </button>
 
-        <div className="flex items-start gap-4 mb-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
-            <AlertTriangle className="h-6 w-6" aria-hidden="true" />
-          </div>
-          <div className="flex-1 min-w-0 pr-6">
-            <h2 id="offline-dialog-title" className="text-xl font-noto font-medium text-charcoal-800 mb-2">
-              antiresume is coming back soon
-            </h2>
-            <p className="text-sm text-charcoal-600 leading-relaxed">
-              The project is temporarily offline while the database is down. Follow antiresume on X or Instagram for an alert when it&apos;s live again.
-            </p>
-          </div>
-        </div>
+        <h2 id="offline-dialog-title" className="text-base font-noto font-medium text-charcoal-800 mb-1">
+          coming back soon
+        </h2>
+        <p className="text-xs text-charcoal-600 leading-relaxed mb-4">
+          follow for an alert when antiresume is live again
+        </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-2">
+        <div className="flex items-center justify-center gap-3">
           <a
             href="https://x.com/antiresume"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen px-4 py-2.5 rounded-xl transition-all duration-200"
+            aria-label="Follow antiresume on X"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream transition-all duration-200"
           >
-            <ExternalLink className="w-4 h-4" />
-            Follow on X
+            <XLogo className="h-4 w-4" />
           </a>
           <a
             href="https://instagram.com/antiresume"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-4 py-2.5 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-200"
+            aria-label="Follow antiresume on Instagram"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-matcha-cream hover:bg-sage-100 text-charcoal-800 border-2 border-sage-300 hover:border-sage-400 transition-all duration-200"
           >
-            <ExternalLink className="w-4 h-4" />
-            Follow on Instagram
+            <InstagramLogo className="h-4 w-4" />
           </a>
         </div>
       </div>

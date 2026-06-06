@@ -58,24 +58,24 @@ export default function OfflineDialog({ open, onClose }: OfflineDialogProps) {
           follow for an alert when antiresume is live again
         </p>
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-5">
           <a
             href="https://x.com/antiresume"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow antiresume on X"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream transition-all duration-200"
+            className="text-charcoal-700 hover:text-sage-500 transition-colors duration-200"
           >
-            <XLogo className="h-4 w-4" />
+            <XLogo className="h-6 w-6" />
           </a>
           <a
             href="https://instagram.com/antiresume"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow antiresume on Instagram"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-matcha-cream hover:bg-sage-100 text-charcoal-800 border-2 border-sage-300 hover:border-sage-400 transition-all duration-200"
+            className="text-charcoal-700 hover:text-sage-500 transition-colors duration-200"
           >
-            <InstagramLogo className="h-4 w-4" />
+            <InstagramLogo className="h-6 w-6" />
           </a>
         </div>
       </div>

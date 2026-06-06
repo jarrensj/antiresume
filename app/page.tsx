@@ -8,8 +8,10 @@ import ResumeForm from '@/components/ResumeForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import SocialLinksForm from '@/components/SocialLinksForm'
 import WalletAddressesForm from '@/components/WalletAddressesForm'
-import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon } from 'lucide-react'
+import { FileText, Users, Shield, Sparkles, Code, Palette, TrendingUp, ExternalLink, Menu, X as CloseIcon, AlertTriangle } from 'lucide-react'
 import DashboardSidebar from '@/components/DashboardSidebar'
+
+const PROJECT_OFFLINE = true
 
 interface UserProfile {
   id: string
@@ -31,6 +33,12 @@ export default function Home() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetError, setResetError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showOfflineDialog, setShowOfflineDialog] = useState(false)
+
+  const openOfflineDialog = (event?: React.MouseEvent) => {
+    event?.preventDefault()
+    setShowOfflineDialog(true)
+  }
 
   const closeSidebar = () => setSidebarOpen(false)
 
@@ -130,6 +138,36 @@ export default function Home() {
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--background)' }}>
+      {PROJECT_OFFLINE && (
+        <div className="border-b-2 border-amber-300 bg-amber-100/80 px-6 py-3">
+          <div className="max-w-4xl mx-auto flex items-start gap-3 text-sm text-charcoal-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600" strokeWidth={1.75} aria-hidden="true" />
+            <p className="leading-relaxed">
+              <span className="font-medium">antiresume is temporarily offline.</span>{' '}
+              The database is down and the project is paused while we work on it. Follow{' '}
+              <a
+                href="https://x.com/antiresume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-sage-500"
+              >
+                @antiresume on X
+              </a>{' '}
+              or{' '}
+              <a
+                href="https://instagram.com/antiresume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-sage-500"
+              >
+                Instagram
+              </a>{' '}
+              for alerts when it&apos;s live again.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Show when="signed-out">
         {/* Hero Section */}
         <section className="py-20 px-6">
@@ -153,11 +191,21 @@ export default function Home() {
 
             {/* CTA Button */}
             <div className="mb-16">
-              <SignInButton>
-                <button className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+              {PROJECT_OFFLINE ? (
+                <button
+                  type="button"
+                  onClick={openOfflineDialog}
+                  className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
                   Show your antiresume
                 </button>
-              </SignInButton>
+              ) : (
+                <SignInButton>
+                  <button className="bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    Show your antiresume
+                  </button>
+                </SignInButton>
+              )}
             </div>
 
             {/* Subtle decorative line */}
@@ -360,6 +408,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -368,6 +417,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -376,6 +426,7 @@ export default function Home() {
                 href="/jarrensj"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={PROJECT_OFFLINE ? openOfflineDialog : undefined}
                 className="bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-6 py-3 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 /jarrensj
@@ -565,6 +616,66 @@ export default function Home() {
         )}
         </div>
       </Show>
+
+      {/* Project Offline Dialog */}
+      {showOfflineDialog && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-charcoal-900/40"
+          onClick={() => setShowOfflineDialog(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="offline-dialog-title"
+        >
+          <div
+            className="relative w-full max-w-md bg-matcha-cream rounded-2xl shadow-xl border-2 border-sage-300 p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowOfflineDialog(false)}
+              className="absolute top-3 right-3 p-1 rounded-md text-charcoal-500 hover:text-charcoal-800 hover:bg-sage-100 transition-colors"
+              aria-label="Close"
+            >
+              <CloseIcon className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-start gap-4 mb-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <div className="flex-1 min-w-0 pr-6">
+                <h2 id="offline-dialog-title" className="text-xl font-noto font-medium text-charcoal-800 mb-2">
+                  antiresume is coming back soon
+                </h2>
+                <p className="text-sm text-charcoal-600 leading-relaxed">
+                  The project is temporarily offline while the database is down. Follow antiresume on X or Instagram for an alert when it&apos;s live again.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-2">
+              <a
+                href="https://x.com/antiresume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-charcoal-700 hover:bg-charcoal-800 text-matcha-cream font-zen px-4 py-2.5 rounded-xl transition-all duration-200"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Follow on X
+              </a>
+              <a
+                href="https://instagram.com/antiresume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-matcha-cream hover:bg-sage-100 text-charcoal-800 font-zen px-4 py-2.5 rounded-xl border-2 border-sage-300 hover:border-sage-400 transition-all duration-200"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Follow on Instagram
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reset Profile Confirmation Dialog */}
       <ConfirmDialog

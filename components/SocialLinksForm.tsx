@@ -2,6 +2,11 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { ensureHttpsProtocol } from '@/app/lib/utils'
+import {
+  normalizeInstagramHandle,
+  normalizeLinkedInUrl,
+  normalizeTwitterHandle,
+} from '@/app/lib/socials'
 
 type SocialFieldKey = 'linkedin' | 'twitter_handle' | 'ig_handle' | 'website'
 
@@ -68,25 +73,22 @@ export default function SocialLinksForm({ onSocialsUpdated }: SocialLinksFormPro
   }
 
   const handleBlur = (field: SocialFieldKey) => (event: ChangeEvent<HTMLInputElement>) => {
-    // Auto-add https:// protocol to URL fields when user leaves the input
-    if (field === 'website' || field === 'linkedin') {
-      const value = event.target.value.trim()
-      if (value) {
-        setSocials((prev) => ({
-          ...prev,
-          [field]: ensureHttpsProtocol(value),
-        }))
-      }
+    const value = event.target.value.trim()
+    if (!value) return
+
+    let normalized = value
+    if (field === 'website') {
+      normalized = ensureHttpsProtocol(value)
+    } else if (field === 'linkedin') {
+      normalized = normalizeLinkedInUrl(value)
+    } else if (field === 'twitter_handle') {
+      normalized = normalizeTwitterHandle(value)
+    } else if (field === 'ig_handle') {
+      normalized = normalizeInstagramHandle(value)
     }
-    // Remove @ symbol from Twitter and Instagram handles if present
-    if (field === 'twitter_handle' || field === 'ig_handle') {
-      const value = event.target.value.trim()
-      if (value) {
-        setSocials((prev) => ({
-          ...prev,
-          [field]: value.startsWith('@') ? value.slice(1) : value,
-        }))
-      }
+
+    if (normalized !== value) {
+      setSocials((prev) => ({ ...prev, [field]: normalized }))
     }
   }
 

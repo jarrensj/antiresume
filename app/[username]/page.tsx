@@ -1,9 +1,10 @@
 'use client'
 
 import { use, useState, useEffect } from 'react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import PublicTweetCard from '@/components/PublicTweetCard'
-import { Linkedin, Twitter, Instagram, Globe, Copy, Check } from 'lucide-react'
+import { Linkedin, Twitter, Instagram, Globe, Copy, Check, Plus } from 'lucide-react'
 
 interface TweetItem {
   tweet_link: string
@@ -36,6 +37,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [copiedWallet, setCopiedWallet] = useState<'evm' | 'solana' | null>(null)
+  const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -51,7 +53,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           return
         }
         const data = await response.json()
-        setProfile(data.profile)        
+        setProfile(data.profile)
       } catch (err) {
         console.error('Error fetching profile:', err)
         setError('Failed to load profile')
@@ -60,6 +62,29 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       }
     }
     fetchProfile()
+  }, [resolvedParams.username])
+
+  // Detect whether the signed-in viewer is the owner of this profile by
+  // checking their own username (no auth header → API returns 401, so anon
+  // visitors silently get isOwner=false).
+  useEffect(() => {
+    async function checkOwnership() {
+      try {
+        const res = await fetch('/api/username')
+        if (!res.ok) return
+        const data = await res.json()
+        const viewerUsername = data?.profile?.username
+        if (
+          typeof viewerUsername === 'string' &&
+          viewerUsername.toLowerCase() === resolvedParams.username.toLowerCase()
+        ) {
+          setIsOwner(true)
+        }
+      } catch {
+        // ignore — treat as not-owner
+      }
+    }
+    checkOwnership()
   }, [resolvedParams.username])
 
   if (loading) {
@@ -236,6 +261,22 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 ))}
               </div>
             </>
+          ) : isOwner ? (
+            <div className="text-center py-16 px-6">
+              <p className="text-secondary mb-2" style={{ fontSize: '1.1rem' }}>
+                Your post stack is empty.
+              </p>
+              <p className="text-secondary mb-6" style={{ fontSize: '0.95rem' }}>
+                Add an X/Twitter or Instagram link to show what you&apos;ve been up to.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 btn-base btn-primary px-6"
+              >
+                <Plus size={16} />
+                Add your first post
+              </Link>
+            </div>
           ) : (
             <div className="text-center py-16">
               <p className="text-secondary" style={{ fontSize: '1.1rem' }}>
